@@ -19,3 +19,9 @@ logs/
 .DS_Store
 Thumbs.db
 
+data_collection/.env
+venv/
+
+db.sqlite3
+__pycache__
+venv

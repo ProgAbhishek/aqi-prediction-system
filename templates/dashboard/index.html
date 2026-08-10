@@ -1,0 +1,104 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Air Quality Dashboard</h1>
+    <p class="subtitle">Real-time monitoring &amp; ML-powered predictions for Kathmandu</p>
+</div>
+
+<!-- Status banner -->
+<div class="status-banner">
+    <div class="status-dot"></div>
+    <span>Django connected to <strong>air_quality.db</strong> — {{ total_records }} records loaded</span>
+</div>
+
+{% if latest %}
+<!-- Current AQI hero card -->
+<section class="hero-card">
+    <div class="hero-aqi" style="--aqi-color: {{ latest.aqi_color }}">
+        <div class="aqi-value">{{ latest.aqi }}</div>
+        <div class="aqi-label" style="color: {{ latest.aqi_color }}">{{ latest.aqi_label }}</div>
+        <div class="aqi-scale">OpenWeatherMap AQI (1–5)</div>
+    </div>
+    <div class="hero-details">
+        <h2>Latest Reading</h2>
+        <p class="hero-timestamp">Last updated: {{ latest.timestamp }}</p>
+        <div class="pollutant-grid">
+            <div class="pollutant-card">
+                <span class="pollutant-name">PM2.5</span>
+                <span class="pollutant-value">{{ latest.pm2_5 }}</span>
+                <span class="pollutant-unit">µg/m³</span>
+            </div>
+            <div class="pollutant-card">
+                <span class="pollutant-name">PM10</span>
+                <span class="pollutant-value">{{ latest.pm10 }}</span>
+                <span class="pollutant-unit">µg/m³</span>
+            </div>
+            <div class="pollutant-card">
+                <span class="pollutant-name">CO</span>
+                <span class="pollutant-value">{{ latest.co }}</span>
+                <span class="pollutant-unit">µg/m³</span>
+            </div>
+            <div class="pollutant-card">
+                <span class="pollutant-name">NO₂</span>
+                <span class="pollutant-value">{{ latest.no2 }}</span>
+                <span class="pollutant-unit">µg/m³</span>
+            </div>
+            <div class="pollutant-card">
+                <span class="pollutant-name">O₃</span>
+                <span class="pollutant-value">{{ latest.o3 }}</span>
+                <span class="pollutant-unit">µg/m³</span>
+            </div>
+            <div class="pollutant-card">
+                <span class="pollutant-name">SO₂</span>
+                <span class="pollutant-value">{{ latest.so2 }}</span>
+                <span class="pollutant-unit">µg/m³</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Recent readings table -->
+<section class="section">
+    <h2>Recent Readings</h2>
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Timestamp</th>
+                    <th>AQI</th>
+                    <th>PM2.5</th>
+                    <th>PM10</th>
+                    <th>CO</th>
+                    <th>NO₂</th>
+                    <th>O₃</th>
+                    <th>SO₂</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in recent %}
+                <tr>
+                    <td>{{ row.id }}</td>
+                    <td>{{ row.timestamp }}</td>
+                    <td><span class="aqi-badge aqi-{{ row.aqi }}">{{ row.aqi }}</span></td>
+                    <td>{{ row.pm2_5 }}</td>
+                    <td>{{ row.pm10 }}</td>
+                    <td>{{ row.co }}</td>
+                    <td>{{ row.no2 }}</td>
+                    <td>{{ row.o3 }}</td>
+                    <td>{{ row.so2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% else %}
+<div class="empty-state">
+    <p>No data found in the database. Run the data collection scheduler first.</p>
+</div>
+{% endif %}
+{% endblock %}

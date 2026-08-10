@@ -1,0 +1,463 @@
+/* ========================================
+   AQI Prediction System — Design Tokens
+   ======================================== */
+
+:root {
+    /* Color palette */
+    --bg-primary: #0f1117;
+    --bg-secondary: #1a1d27;
+    --bg-card: #1e2233;
+    --bg-card-hover: #252a3a;
+
+    --text-primary: #e8eaed;
+    --text-secondary: #9aa0b0;
+    --text-muted: #6b7280;
+
+    --accent-blue: #6366f1;
+    --accent-blue-glow: rgba(99, 102, 241, 0.15);
+    --accent-green: #4caf50;
+    --accent-orange: #ff9800;
+    --accent-red: #f44336;
+    --accent-purple: #9c27b0;
+
+    --border-color: rgba(255, 255, 255, 0.06);
+    --border-radius: 12px;
+
+    /* AQI scale colors */
+    --aqi-1: #4caf50;
+    --aqi-2: #8bc34a;
+    --aqi-3: #ff9800;
+    --aqi-4: #f44336;
+    --aqi-5: #9c27b0;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
+
+    /* Transitions */
+    --transition-fast: 150ms ease;
+    --transition-normal: 250ms ease;
+}
+
+
+/* ========================================
+   Reset & Base
+   ======================================== */
+
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    -webkit-font-smoothing: antialiased;
+}
+
+
+/* ========================================
+   Navbar
+   ======================================== */
+
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 2rem;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+}
+
+.nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+}
+
+.nav-icon {
+    font-size: 1.5rem;
+}
+
+.nav-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    background: linear-gradient(135deg, var(--accent-blue), #a78bfa);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.nav-links {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.nav-link {
+    text-decoration: none;
+    color: var(--text-secondary);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all var(--transition-fast);
+}
+
+.nav-link:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-link.active {
+    color: var(--accent-blue);
+    background: var(--accent-blue-glow);
+}
+
+
+/* ========================================
+   Main Content
+   ======================================== */
+
+.main-content {
+    flex: 1;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.page-header {
+    margin-bottom: 1.5rem;
+}
+
+.page-header h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.page-header .subtitle {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin-top: 0.25rem;
+}
+
+
+/* ========================================
+   Status Banner
+   ======================================== */
+
+.status-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.75rem 1.25rem;
+    background: rgba(76, 175, 80, 0.08);
+    border: 1px solid rgba(76, 175, 80, 0.2);
+    border-radius: var(--border-radius);
+    margin-bottom: 2rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    animation: slideDown 0.4s ease;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent-green);
+    box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* ========================================
+   Hero Card (Latest Reading)
+   ======================================== */
+
+.hero-card {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 2rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-md);
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.hero-aqi {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.aqi-value {
+    font-size: 4rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--aqi-color, var(--accent-blue));
+    text-shadow: 0 0 30px var(--aqi-color, var(--accent-blue));
+}
+
+.aqi-label {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+}
+
+.aqi-scale {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+}
+
+.hero-details h2 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.hero-timestamp {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-bottom: 1.25rem;
+}
+
+
+/* ========================================
+   Pollutant Grid
+   ======================================== */
+
+.pollutant-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 0.75rem;
+}
+
+.pollutant-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    transition: all var(--transition-fast);
+}
+
+.pollutant-card:hover {
+    background: var(--bg-card-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.pollutant-name {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+}
+
+.pollutant-value {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0.25rem 0;
+}
+
+.pollutant-unit {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+
+/* ========================================
+   Section & Table
+   ======================================== */
+
+.section {
+    margin-bottom: 2rem;
+}
+
+.section h2 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.data-table thead {
+    background: var(--bg-secondary);
+}
+
+.data-table th {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border-color);
+    white-space: nowrap;
+}
+
+.data-table td {
+    padding: 0.625rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.data-table tbody tr {
+    transition: background var(--transition-fast);
+}
+
+.data-table tbody tr:hover {
+    background: var(--bg-card-hover);
+}
+
+.data-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+
+/* ========================================
+   AQI Badges
+   ======================================== */
+
+.aqi-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 24px;
+    padding: 0 0.5rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.aqi-badge.aqi-1 { background: var(--aqi-1); }
+.aqi-badge.aqi-2 { background: var(--aqi-2); }
+.aqi-badge.aqi-3 { background: var(--aqi-3); }
+.aqi-badge.aqi-4 { background: var(--aqi-4); }
+.aqi-badge.aqi-5 { background: var(--aqi-5); }
+
+
+/* ========================================
+   Empty State
+   ======================================== */
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-muted);
+    font-size: 1rem;
+}
+
+
+/* ========================================
+   Footer
+   ======================================== */
+
+.footer {
+    text-align: center;
+    padding: 1.5rem 2rem;
+    border-top: 1px solid var(--border-color);
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+
+/* ========================================
+   Responsive
+   ======================================== */
+
+@media (max-width: 768px) {
+    .navbar {
+        padding: 0.75rem 1rem;
+    }
+
+    .main-content {
+        padding: 1.25rem;
+    }
+
+    .hero-card {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+
+    .pollutant-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .page-header h1 {
+        font-size: 1.35rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .pollutant-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
