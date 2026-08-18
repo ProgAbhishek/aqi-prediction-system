@@ -1,0 +1,156 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Historical Data{% endblock %}
+{% block page_title %}Historical Data{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <h1>Historical Data</h1>
+    <p class="subtitle">AQI and PM2.5 trends from the existing database</p>
+</div>
+
+<div class="charts-grid">
+    <div class="card chart-card">
+        <h3 class="chart-title">AQI Over Time</h3>
+        <div class="chart-wrapper">
+            <canvas id="aqiChart"></canvas>
+        </div>
+    </div>
+    <div class="card chart-card">
+        <h3 class="chart-title">PM2.5 Over Time</h3>
+        <div class="chart-wrapper">
+            <canvas id="pm25Chart"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="section">
+    <h2>Recent Readings</h2>
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>AQI</th>
+                    <th>PM2.5</th>
+                    <th>PM10</th>
+                    <th>CO</th>
+                    <th>NO&#8322;</th>
+                    <th>O&#8323;</th>
+                    <th>SO&#8322;</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in recent %}
+                <tr>
+                    <td>{{ row.timestamp }}</td>
+                    <td><span class="aqi-badge aqi-{{ row.aqi }}">{{ row.aqi }}</span></td>
+                    <td>{{ row.pm2_5 }}</td>
+                    <td>{{ row.pm10 }}</td>
+                    <td>{{ row.co }}</td>
+                    <td>{{ row.no2 }}</td>
+                    <td>{{ row.o3 }}</td>
+                    <td>{{ row.so2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const historicalData = {{ historical_json|safe }};
+
+if (historicalData.length > 0) {
+    const labels = historicalData.map(d => {
+        const dt = new Date(d.timestamp);
+        return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' +
+               dt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    });
+
+    const aqiValues = historicalData.map(d => d.aqi);
+    const pm25Values = historicalData.map(d => d.pm2_5);
+
+    const aqiColors = { 1: '#10B981', 2: '#F59E0B', 3: '#F97316', 4: '#EF4444', 5: '#991B1B' };
+    const pointColors = aqiValues.map(v => aqiColors[v] || '#9CA3AF');
+
+    const gridColor = 'rgba(0, 0, 0, 0.05)';
+    const tickColor = '#6B7280';
+
+    const commonOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: '#1F2937',
+                titleFont: { family: 'Inter', size: 12 },
+                bodyFont: { family: 'Inter', size: 11 },
+                padding: 10,
+                cornerRadius: 8
+            }
+        },
+        scales: {
+            x: {
+                ticks: { color: tickColor, maxRotation: 45, maxTicksLimit: 12, font: { size: 11, family: 'Inter' } },
+                grid: { color: gridColor }
+            },
+            y: {
+                ticks: { color: tickColor, font: { size: 11, family: 'Inter' } },
+                grid: { color: gridColor }
+            }
+        },
+        elements: { point: { radius: 2, hoverRadius: 5 }, line: { tension: 0.4 } }
+    };
+
+    new Chart(document.getElementById('aqiChart'), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'AQI',
+                data: aqiValues,
+                borderColor: '#10B981',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                fill: true,
+                borderWidth: 2,
+                pointBackgroundColor: pointColors,
+                pointBorderColor: pointColors
+            }]
+        },
+        options: {
+            ...commonOptions,
+            scales: {
+                ...commonOptions.scales,
+                y: {
+                    ...commonOptions.scales.y,
+                    min: 1,
+                    max: 5,
+                    ticks: { ...commonOptions.scales.y.ticks, stepSize: 1 }
+                }
+            }
+        }
+    });
+
+    new Chart(document.getElementById('pm25Chart'), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'PM2.5',
+                data: pm25Values,
+                borderColor: '#F97316',
+                backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                fill: true,
+                borderWidth: 2
+            }]
+        },
+        options: commonOptions
+    });
+}
+</script>
+{% endblock %}

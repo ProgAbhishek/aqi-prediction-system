@@ -1,104 +1,242 @@
 {% extends 'dashboard/base.html' %}
 
 {% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <h1>Air Quality Dashboard</h1>
-    <p class="subtitle">Real-time monitoring &amp; ML-powered predictions for Kathmandu</p>
-</div>
 
-<!-- Status banner -->
-<div class="status-banner">
-    <div class="status-dot"></div>
-    <span>Django connected to <strong>air_quality.db</strong> — {{ total_records }} records loaded</span>
+<div class="page-header">
+    <h1>Dashboard Overview</h1>
+    <p class="subtitle">Real-time air quality monitoring and predictions</p>
 </div>
 
 {% if latest %}
-<!-- Current AQI hero card -->
-<section class="hero-card">
-    <div class="hero-aqi" style="--aqi-color: {{ latest.aqi_color }}">
-        <div class="aqi-value">{{ latest.aqi }}</div>
-        <div class="aqi-label" style="color: {{ latest.aqi_color }}">{{ latest.aqi_label }}</div>
-        <div class="aqi-scale">OpenWeatherMap AQI (1–5)</div>
+
+<!-- ──────── Current AQI + Predicted AQI ──────── -->
+<div class="aqi-hero-grid">
+
+    <!-- Current AQI -->
+    <div class="card aqi-hero-card {{ latest.aqi_css_class }}">
+        <span class="card-label">Current AQI</span>
+        <span class="aqi-number">{{ latest.aqi }}</span>
+        <span class="aqi-category">{{ latest.aqi_label }}</span>
+        <span class="aqi-meaning">{{ latest.aqi_meaning }}</span>
     </div>
-    <div class="hero-details">
-        <h2>Latest Reading</h2>
-        <p class="hero-timestamp">Last updated: {{ latest.timestamp }}</p>
-        <div class="pollutant-grid">
-            <div class="pollutant-card">
-                <span class="pollutant-name">PM2.5</span>
-                <span class="pollutant-value">{{ latest.pm2_5 }}</span>
-                <span class="pollutant-unit">µg/m³</span>
-            </div>
-            <div class="pollutant-card">
-                <span class="pollutant-name">PM10</span>
-                <span class="pollutant-value">{{ latest.pm10 }}</span>
-                <span class="pollutant-unit">µg/m³</span>
-            </div>
-            <div class="pollutant-card">
-                <span class="pollutant-name">CO</span>
-                <span class="pollutant-value">{{ latest.co }}</span>
-                <span class="pollutant-unit">µg/m³</span>
-            </div>
-            <div class="pollutant-card">
-                <span class="pollutant-name">NO₂</span>
-                <span class="pollutant-value">{{ latest.no2 }}</span>
-                <span class="pollutant-unit">µg/m³</span>
-            </div>
-            <div class="pollutant-card">
-                <span class="pollutant-name">O₃</span>
-                <span class="pollutant-value">{{ latest.o3 }}</span>
-                <span class="pollutant-unit">µg/m³</span>
-            </div>
-            <div class="pollutant-card">
-                <span class="pollutant-name">SO₂</span>
-                <span class="pollutant-value">{{ latest.so2 }}</span>
-                <span class="pollutant-unit">µg/m³</span>
+
+    <!-- Predicted AQI -->
+    <div class="card aqi-hero-card {% if predicted_aqi_info %}{{ predicted_aqi_info.css_class }}{% endif %}">
+        <span class="card-label">Predicted AQI</span>
+        {% if prediction.aqi is not None %}
+        <span class="aqi-number">{{ prediction.aqi }}</span>
+        <span class="aqi-category">{{ predicted_aqi_info.category }}</span>
+        <span class="aqi-meaning">Random Forest model prediction</span>
+        {% else %}
+        <span class="aqi-number">&mdash;</span>
+        <span class="aqi-category">Unavailable</span>
+        <span class="aqi-meaning">Prediction currently unavailable.</span>
+        {% endif %}
+        {% if prediction.error %}
+        <span class="card-error">{{ prediction.error }}</span>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- ──────── Comparison Banner ──────── -->
+{% if comparison %}
+<div class="card comparison-card {{ comparison.css_class }}">
+    <span class="comparison-icon">{{ comparison.icon }}</span>
+    <span>
+        Current AQI: <strong>{{ latest.aqi }}</strong>
+        &nbsp;&bull;&nbsp;
+        Predicted AQI: <strong>{% if prediction.aqi is not None %}{{ prediction.aqi }}{% else %}&mdash;{% endif %}</strong>
+        &nbsp;&mdash;&nbsp;
+        {{ comparison.text }}
+    </span>
+</div>
+{% endif %}
+
+<!-- ──────── Health Recommendation & Air Quality Status ──────── -->
+<div class="health-section">
+    <div class="card health-card">
+        <div class="section-title">🫁 Health Recommendation</div>
+        <p>{{ latest.aqi_recommendation }}</p>
+    </div>
+    <div class="card health-card">
+        <div class="section-title">📊 Air Quality Status</div>
+        <p>{{ latest.aqi_meaning }} {{ latest.aqi_icon }}</p>
+    </div>
+</div>
+
+<!-- ──────── Pollutant Concentrations ──────── -->
+<div class="section">
+    <h2>Pollutant Concentrations</h2>
+    <div class="pollutant-grid">
+        {% for p in pollutants %}
+        <div class="card pollutant-card">
+            <span class="card-label">{{ p.label }}</span>
+            <span class="pollutant-value">{{ p.value }}</span>
+            <span class="pollutant-unit">{{ p.unit }}</span>
+            <span class="pollutant-desc">{{ p.description }}</span>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- ──────── AQI Trend ──────── -->
+<div class="section">
+    <h2>AQI Trend</h2>
+    <div class="card chart-single">
+        <div class="chart-wrapper">
+            <canvas id="aqiTrendChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- ──────── Anomaly Detection Status ──────── -->
+<div class="section">
+    <h2>Anomaly Status</h2>
+    {% if anomaly.is_anomaly is not None %}
+    <div class="card anomaly-status-card {% if anomaly.is_anomaly %}anomaly-alert{% else %}anomaly-ok{% endif %}">
+        <span class="anomaly-icon">{% if anomaly.is_anomaly %}⚠️{% else %}✅{% endif %}</span>
+        <div>
+            <div class="anomaly-title">{% if anomaly.is_anomaly %}ANOMALY DETECTED{% else %}NORMAL READING{% endif %}</div>
+            <div class="anomaly-desc">
+                {% if anomaly.is_anomaly %}
+                This reading shows an unusual pollution pattern.
+                {% else %}
+                No unusual pollution pattern detected.
+                {% endif %}
             </div>
         </div>
     </div>
-</section>
-
-<!-- Recent readings table -->
-<section class="section">
-    <h2>Recent Readings</h2>
-    <div class="table-wrapper">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Timestamp</th>
-                    <th>AQI</th>
-                    <th>PM2.5</th>
-                    <th>PM10</th>
-                    <th>CO</th>
-                    <th>NO₂</th>
-                    <th>O₃</th>
-                    <th>SO₂</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in recent %}
-                <tr>
-                    <td>{{ row.id }}</td>
-                    <td>{{ row.timestamp }}</td>
-                    <td><span class="aqi-badge aqi-{{ row.aqi }}">{{ row.aqi }}</span></td>
-                    <td>{{ row.pm2_5 }}</td>
-                    <td>{{ row.pm10 }}</td>
-                    <td>{{ row.co }}</td>
-                    <td>{{ row.no2 }}</td>
-                    <td>{{ row.o3 }}</td>
-                    <td>{{ row.so2 }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    {% elif anomaly.error %}
+    <div class="card anomaly-status-card">
+        <span class="anomaly-icon">❓</span>
+        <div>
+            <div class="anomaly-title">DETECTION UNAVAILABLE</div>
+            <div class="anomaly-desc">Anomaly detection currently unavailable.</div>
+            <div class="card-error">{{ anomaly.error }}</div>
+        </div>
     </div>
-</section>
-{% else %}
-<div class="empty-state">
-    <p>No data found in the database. Run the data collection scheduler first.</p>
+    {% else %}
+    <div class="card anomaly-status-card">
+        <span class="anomaly-icon">❓</span>
+        <div>
+            <div class="anomaly-title">DETECTION UNAVAILABLE</div>
+            <div class="anomaly-desc">Anomaly detection currently unavailable.</div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- ──────── Smart Suggestions ──────── -->
+{% if latest.aqi_suggestions %}
+<div class="section">
+    <h2>Air Quality Suggestions</h2>
+    <div class="card suggestions-card">
+        <ul class="suggestions-list">
+            {% for suggestion in latest.aqi_suggestions %}
+            <li>{{ suggestion }}</li>
+            {% endfor %}
+        </ul>
+    </div>
 </div>
 {% endif %}
+
+{% else %}
+
+<!-- No data state -->
+<div class="empty-state">
+    <div class="empty-icon">📡</div>
+    <p>No air quality data available.</p>
+    <p style="margin-top:0.5rem; font-size:0.85rem;">Run the data collection scheduler first.</p>
+</div>
+
+{% endif %}
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const historicalData = {{ historical_json|safe }};
+
+if (historicalData && historicalData.length > 0) {
+    const labels = historicalData.map(d => {
+        const dt = new Date(d.timestamp);
+        return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' +
+               dt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    });
+
+    const aqiValues = historicalData.map(d => d.aqi);
+
+    // Map each AQI value to its category color
+    const aqiColors = {
+        1: '#10B981',
+        2: '#F59E0B',
+        3: '#F97316',
+        4: '#EF4444',
+        5: '#991B1B'
+    };
+
+    const pointColors = aqiValues.map(v => aqiColors[v] || '#9CA3AF');
+
+    new Chart(document.getElementById('aqiTrendChart'), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'AQI',
+                data: aqiValues,
+                borderColor: '#1D4ED8',
+                backgroundColor: 'rgba(29, 78, 216, 0.1)',
+                fill: true,
+                borderWidth: 2,
+                pointBackgroundColor: pointColors,
+                pointBorderColor: pointColors,
+                pointRadius: 3,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#1F2937',
+                    titleFont: { family: 'Inter', size: 12 },
+                    bodyFont: { family: 'Inter', size: 11 },
+                    padding: 10,
+                    cornerRadius: 8
+                }
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        color: '#6B7280',
+                        maxRotation: 45,
+                        maxTicksLimit: 10,
+                        font: { size: 11, family: 'Inter' }
+                    },
+                    grid: { color: 'rgba(0,0,0,0.05)' }
+                },
+                y: {
+                    min: 1,
+                    max: 5,
+                    ticks: {
+                        stepSize: 1,
+                        color: '#6B7280',
+                        font: { size: 11, family: 'Inter' }
+                    },
+                    grid: { color: 'rgba(0,0,0,0.05)' }
+                }
+            },
+            elements: {
+                line: { tension: 0.4 }
+            }
+        }
+    });
+}
+</script>
 {% endblock %}

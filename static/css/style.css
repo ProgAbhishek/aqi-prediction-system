@@ -1,463 +1,538 @@
 /* ========================================
-   AQI Prediction System — Design Tokens
+   AQI Prediction System — Reference UI Theme
    ======================================== */
 
 :root {
-    /* Color palette */
-    --bg-primary: #0f1117;
-    --bg-secondary: #1a1d27;
-    --bg-card: #1e2233;
-    --bg-card-hover: #252a3a;
+    --bg-main: #F4F7F6;
+    --bg-sidebar: #FFFFFF;
+    --bg-header: #FFFFFF;
+    --bg-card: #FFFFFF;
 
-    --text-primary: #e8eaed;
-    --text-secondary: #9aa0b0;
-    --text-muted: #6b7280;
+    --text-primary: #1F2937;
+    --text-secondary: #6B7280;
+    --text-muted: #9CA3AF;
 
-    --accent-blue: #6366f1;
-    --accent-blue-glow: rgba(99, 102, 241, 0.15);
-    --accent-green: #4caf50;
-    --accent-orange: #ff9800;
-    --accent-red: #f44336;
-    --accent-purple: #9c27b0;
+    --banner-bg: #0C4B8E; /* Dark blue from reference */
+    --accent-blue: #1D4ED8;
+    
+    --border-color: #E5E7EB;
+    --radius: 12px;
 
-    --border-color: rgba(255, 255, 255, 0.06);
-    --border-radius: 12px;
+    /* AQI category colors */
+    --aqi-good: #10B981; 
+    --aqi-fair: #F59E0B; 
+    --aqi-moderate: #F97316; 
+    --aqi-poor: #EF4444; 
+    --aqi-very-poor: #991B1B; 
 
-    /* AQI scale colors */
-    --aqi-1: #4caf50;
-    --aqi-2: #8bc34a;
-    --aqi-3: #ff9800;
-    --aqi-4: #f44336;
-    --aqi-5: #9c27b0;
+    --aqi-good-bg: #D1FAE5;
+    --aqi-fair-bg: #FEF3C7;
+    --aqi-moderate-bg: #FFEDD5;
+    --aqi-poor-bg: #FEE2E2;
+    --aqi-very-poor-bg: #FECACA;
 
-    /* Shadows */
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.3);
-    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
-
-    /* Transitions */
-    --transition-fast: 150ms ease;
-    --transition-normal: 250ms ease;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-
-/* ========================================
-   Reset & Base
-   ======================================== */
-
-*,
-*::before,
-*::after {
+*, *::before, *::after {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-html {
-    font-size: 16px;
-    scroll-behavior: smooth;
-}
-
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background-color: var(--bg-primary);
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-main);
     color: var(--text-primary);
-    line-height: 1.6;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
     -webkit-font-smoothing: antialiased;
 }
 
+/* Layout */
+.layout-wrapper {
+    display: flex;
+    min-height: 100vh;
+}
 
-/* ========================================
-   Navbar
-   ======================================== */
+/* Sidebar */
+.sidebar {
+    width: 260px;
+    background: var(--bg-sidebar);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
 
-.navbar {
+.sidebar-header {
+    padding: 1.5rem;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 0.75rem 2rem;
-    background: var(--bg-secondary);
+    gap: 0.75rem;
     border-bottom: 1px solid var(--border-color);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    backdrop-filter: blur(12px);
 }
 
-.nav-brand {
+.sidebar-logo {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    object-fit: contain;
+}
+
+.brand-title {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    display: block;
+}
+.brand-subtitle {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.sidebar-nav {
+    padding: 1.5rem 1rem;
+    flex: 1;
     display: flex;
-    align-items: center;
-    gap: 0.625rem;
-}
-
-.nav-icon {
-    font-size: 1.5rem;
-}
-
-.nav-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    background: linear-gradient(135deg, var(--accent-blue), #a78bfa);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.nav-links {
-    display: flex;
+    flex-direction: column;
     gap: 0.25rem;
 }
 
-.nav-link {
-    text-decoration: none;
-    color: var(--text-secondary);
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    transition: all var(--transition-fast);
-}
-
-.nav-link:hover {
-    color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.05);
-}
-
-.nav-link.active {
-    color: var(--accent-blue);
-    background: var(--accent-blue-glow);
-}
-
-
-/* ========================================
-   Main Content
-   ======================================== */
-
-.main-content {
-    flex: 1;
-    max-width: 1200px;
-    width: 100%;
-    margin: 0 auto;
-    padding: 2rem;
-}
-
-.page-header {
-    margin-bottom: 1.5rem;
-}
-
-.page-header h1 {
-    font-size: 1.75rem;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-}
-
-.page-header .subtitle {
-    color: var(--text-secondary);
-    font-size: 0.95rem;
-    margin-top: 0.25rem;
-}
-
-
-/* ========================================
-   Status Banner
-   ======================================== */
-
-.status-banner {
+.nav-item {
     display: flex;
     align-items: center;
-    gap: 0.625rem;
-    padding: 0.75rem 1.25rem;
-    background: rgba(76, 175, 80, 0.08);
-    border: 1px solid rgba(76, 175, 80, 0.2);
-    border-radius: var(--border-radius);
-    margin-bottom: 2rem;
-    font-size: 0.875rem;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
     color: var(--text-secondary);
-    animation: slideDown 0.4s ease;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: all 0.2s;
 }
 
-.status-dot {
+.nav-item:hover {
+    background: #F3F4F6;
+    color: var(--text-primary);
+}
+
+.nav-item.active {
+    background: #EFF6FF;
+    color: var(--accent-blue);
+    font-weight: 600;
+}
+
+.sidebar-footer {
+    padding: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.user-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 0.5rem;
+    background: #ECFDF5;
+    color: #065F46;
+    border-radius: 999px;
+    justify-content: center;
+}
+
+.status-indicator {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: var(--accent-green);
-    box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
-    animation: pulse 2s ease-in-out infinite;
+    background: #10B981;
 }
 
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-}
-
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-
-/* ========================================
-   Hero Card (Latest Reading)
-   ======================================== */
-
-.hero-card {
-    display: grid;
-    grid-template-columns: 200px 1fr;
-    gap: 2rem;
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
-    padding: 2rem;
-    margin-bottom: 2rem;
-    box-shadow: var(--shadow-md);
-    animation: fadeIn 0.5s ease;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.hero-aqi {
+/* Main Content Wrapper */
+.main-wrapper {
+    flex: 1;
     display: flex;
     flex-direction: column;
+    min-width: 0; 
+}
+
+/* Top Header */
+.top-header {
+    height: 64px;
+    background: var(--bg-header);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
     align-items: center;
-    justify-content: center;
-    text-align: center;
+    justify-content: space-between;
+    padding: 0 2rem;
 }
 
-.aqi-value {
-    font-size: 4rem;
-    font-weight: 700;
-    line-height: 1;
-    color: var(--aqi-color, var(--accent-blue));
-    text-shadow: 0 0 30px var(--aqi-color, var(--accent-blue));
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
 }
-
-.aqi-label {
+.page-title {
     font-size: 1.1rem;
     font-weight: 600;
-    margin-top: 0.5rem;
 }
 
-.aqi-scale {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    margin-top: 0.25rem;
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
 }
 
-.hero-details h2 {
-    font-size: 1.2rem;
+.header-date {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    background: #F3F4F6;
+    padding: 0.4rem 0.75rem;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.mobile-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+}
+
+/* Content Area */
+.content-area {
+    padding: 2rem;
+    flex: 1;
+    overflow-y: auto;
+}
+
+/* Banner / Page Header */
+.page-header {
+    background: var(--banner-bg);
+    color: white;
+    padding: 2rem;
+    border-radius: var(--radius);
+    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-shadow: var(--shadow);
+}
+.page-header h1 {
+    font-size: 1.5rem;
     font-weight: 600;
     margin-bottom: 0.25rem;
 }
-
-.hero-timestamp {
-    color: var(--text-secondary);
-    font-size: 0.85rem;
-    margin-bottom: 1.25rem;
+.page-header .subtitle {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.95rem;
 }
 
-
-/* ========================================
-   Pollutant Grid
-   ======================================== */
-
-.pollutant-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-    gap: 0.75rem;
-}
-
-.pollutant-card {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-    text-align: center;
-    transition: all var(--transition-fast);
-}
-
-.pollutant-card:hover {
-    background: var(--bg-card-hover);
-    transform: translateY(-2px);
+/* Cards */
+.card {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 1.5rem;
     box-shadow: var(--shadow-sm);
+    border: 1px solid rgba(0,0,0,0.05);
 }
-
-.pollutant-name {
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--text-muted);
-}
-
-.pollutant-value {
-    font-size: 1.35rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin: 0.25rem 0;
-}
-
-.pollutant-unit {
-    font-size: 0.7rem;
-    color: var(--text-muted);
-}
-
-
-/* ========================================
-   Section & Table
-   ======================================== */
 
 .section {
     margin-bottom: 2rem;
 }
-
 .section h2 {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: 600;
     margin-bottom: 1rem;
+    color: var(--text-primary);
 }
 
+/* Hero Grid (AQI + Predicted) */
+.aqi-hero-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+.aqi-hero-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+.card-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+    letter-spacing: 0.05em;
+}
+.aqi-number {
+    font-size: 3.5rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+.aqi-category {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+.aqi-meaning, .card-note {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/* Comparison Banner */
+.comparison-card {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    margin-bottom: 2rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+.comparison-icon {
+    font-size: 1.25rem;
+}
+.comparison-worse { background: var(--aqi-poor-bg); color: var(--aqi-poor); border-color: rgba(239,68,68,0.2); }
+.comparison-better { background: var(--aqi-good-bg); color: var(--aqi-good); border-color: rgba(16,185,129,0.2); }
+.comparison-neutral { background: var(--aqi-fair-bg); color: var(--aqi-fair); border-color: rgba(245,158,11,0.2); }
+
+
+/* Colors for AQI Text */
+.aqi-good .aqi-number, .aqi-good .aqi-category { color: var(--aqi-good); }
+.aqi-fair .aqi-number, .aqi-fair .aqi-category { color: var(--aqi-fair); }
+.aqi-moderate .aqi-number, .aqi-moderate .aqi-category { color: var(--aqi-moderate); }
+.aqi-poor .aqi-number, .aqi-poor .aqi-category { color: var(--aqi-poor); }
+.aqi-very-poor .aqi-number, .aqi-very-poor .aqi-category { color: var(--aqi-very-poor); }
+
+/* Other Grid layouts */
+.health-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+.health-card .section-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+}
+.health-card p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.pollutant-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 1rem;
+}
+.pollutant-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+}
+.pollutant-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+    color: var(--text-primary);
+}
+.pollutant-unit {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+.pollutant-desc {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-align: center;
+    margin-top: 0.5rem;
+}
+
+/* Charts */
+.charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+.chart-wrapper {
+    height: 250px;
+    position: relative;
+    margin-top: 1rem;
+}
+.chart-single {
+    margin-bottom: 2rem;
+}
+.chart-single .chart-wrapper {
+    height: 300px;
+}
+
+/* Tables */
 .table-wrapper {
     overflow-x: auto;
-    border-radius: var(--border-radius);
-    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
     background: var(--bg-card);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid rgba(0,0,0,0.05);
 }
-
 .data-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.85rem;
 }
-
-.data-table thead {
-    background: var(--bg-secondary);
-}
-
 .data-table th {
-    padding: 0.75rem 1rem;
     text-align: left;
-    font-weight: 600;
+    padding: 1rem;
     font-size: 0.75rem;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
     color: var(--text-muted);
     border-bottom: 1px solid var(--border-color);
-    white-space: nowrap;
 }
-
 .data-table td {
-    padding: 0.625rem 1rem;
+    padding: 1rem;
+    font-size: 0.85rem;
+    color: var(--text-primary);
     border-bottom: 1px solid var(--border-color);
-    color: var(--text-secondary);
-    white-space: nowrap;
 }
-
-.data-table tbody tr {
-    transition: background var(--transition-fast);
-}
-
-.data-table tbody tr:hover {
-    background: var(--bg-card-hover);
-}
-
-.data-table tbody tr:last-child td {
+.data-table tr:last-child td {
     border-bottom: none;
 }
 
-
-/* ========================================
-   AQI Badges
-   ======================================== */
-
+/* Badges */
 .aqi-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 28px;
-    height: 24px;
-    padding: 0 0.5rem;
-    border-radius: 6px;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
     font-size: 0.75rem;
-    font-weight: 700;
-    color: #fff;
+    font-weight: 600;
+    color: white;
 }
+.aqi-badge.aqi-1 { background: var(--aqi-good); }
+.aqi-badge.aqi-2 { background: var(--aqi-fair); }
+.aqi-badge.aqi-3 { background: var(--aqi-moderate); }
+.aqi-badge.aqi-4 { background: var(--aqi-poor); }
+.aqi-badge.aqi-5 { background: var(--aqi-very-poor); }
 
-.aqi-badge.aqi-1 { background: var(--aqi-1); }
-.aqi-badge.aqi-2 { background: var(--aqi-2); }
-.aqi-badge.aqi-3 { background: var(--aqi-3); }
-.aqi-badge.aqi-4 { background: var(--aqi-4); }
-.aqi-badge.aqi-5 { background: var(--aqi-5); }
-
-
-/* ========================================
-   Empty State
-   ======================================== */
-
-.empty-state {
-    text-align: center;
-    padding: 4rem 2rem;
-    color: var(--text-muted);
+/* Anomaly specific */
+.anomaly-status-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+.anomaly-icon {
+    font-size: 2rem;
+}
+.anomaly-title {
+    font-weight: 600;
     font-size: 1rem;
 }
+.anomaly-desc {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+.card-anomaly {
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+.anomaly-ok-badge {
+    background: var(--aqi-good-bg);
+    color: var(--aqi-good);
+}
+.anomaly-alert-badge {
+    background: var(--aqi-poor-bg);
+    color: var(--aqi-poor);
+}
 
-
-/* ========================================
-   Footer
-   ======================================== */
-
-.footer {
+/* Empty State */
+.empty-state {
     text-align: center;
-    padding: 1.5rem 2rem;
-    border-top: 1px solid var(--border-color);
-    color: var(--text-muted);
-    font-size: 0.8rem;
+    padding: 3rem;
+    color: var(--text-secondary);
+}
+.empty-state .empty-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
 }
 
+/* Suggestions */
+.suggestions-list {
+    list-style: none;
+}
+.suggestions-list li {
+    padding: 0.5rem 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+.suggestions-list li:last-child {
+    border-bottom: none;
+}
+.suggestions-list li::before {
+    content: '✓';
+    color: var(--accent-blue);
+    font-weight: bold;
+}
 
-/* ========================================
-   Responsive
-   ======================================== */
+/* Info & Features */
+.info-card {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+}
+.info-card code {
+    background: #F3F4F6;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    color: var(--accent-blue);
+}
+.info-list { margin-left: 1.5rem; margin-top: 1rem; }
+.info-list li { margin-bottom: 0.5rem; }
 
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+.feature-card .card-label {
+    color: var(--accent-blue);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+.feature-card p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .pollutant-grid { grid-template-columns: repeat(3, 1fr); }
+    .aqi-hero-grid, .health-section, .charts-grid, .features-grid { grid-template-columns: 1fr; }
+}
 @media (max-width: 768px) {
-    .navbar {
-        padding: 0.75rem 1rem;
+    .sidebar {
+        position: fixed;
+        left: -260px;
+        top: 0;
+        bottom: 0;
+        z-index: 1000;
+        transition: left 0.3s;
     }
-
-    .main-content {
-        padding: 1.25rem;
-    }
-
-    .hero-card {
-        grid-template-columns: 1fr;
-        text-align: center;
-    }
-
-    .pollutant-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-
-    .page-header h1 {
-        font-size: 1.35rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .pollutant-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+    .sidebar.sidebar-open { left: 0; }
+    .mobile-toggle { display: block; }
+    .header-right { display: none; }
 }

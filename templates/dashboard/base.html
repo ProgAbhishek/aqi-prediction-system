@@ -4,33 +4,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Air Quality Prediction System — Real-time AQI monitoring and ML-powered predictions for Kathmandu">
-    <title>{% block title %}Dashboard{% endblock %} — AQI Prediction System</title>
+    <title>{% block title %}Dashboard{% endblock %} — AQI Portal</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2.1">
     {% block extra_head %}{% endblock %}
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-brand">
-            <span class="nav-icon">🌍</span>
-            <span class="nav-title">AQI Prediction System</span>
+    <div class="layout-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="{% static 'images/aqi_air_quality_logo.png' %}" alt="Logo" class="sidebar-logo">
+                <div class="sidebar-brand">
+                    <span class="brand-title">AQI Portal</span>
+                    <span class="brand-subtitle">Kathmandu Valley</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="{% url 'dashboard:index' %}" class="nav-item{% if request.resolver_match.url_name == 'index' %} active{% endif %}">
+                    Dashboard
+                </a>
+                <a href="{% url 'dashboard:prediction' %}" class="nav-item{% if request.resolver_match.url_name == 'prediction' %} active{% endif %}">
+                    Prediction
+                </a>
+                <a href="{% url 'dashboard:historical' %}" class="nav-item{% if request.resolver_match.url_name == 'historical' %} active{% endif %}">
+                    Historical Data
+                </a>
+                <a href="{% url 'dashboard:anomaly' %}" class="nav-item{% if request.resolver_match.url_name == 'anomaly' %} active{% endif %}">
+                    Anomalies
+                </a>
+                <a href="{% url 'dashboard:about' %}" class="nav-item{% if request.resolver_match.url_name == 'about' %} active{% endif %}">
+                    About Project
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-status">
+                    <div class="status-indicator"></div>
+                    <span>System Online</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Wrapper -->
+        <div class="main-wrapper">
+            <!-- Header -->
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="mobile-toggle" aria-label="Toggle menu" onclick="document.querySelector('.sidebar').classList.toggle('sidebar-open')">☰</button>
+                    <h2 class="page-title">{% block page_title %}Air Quality Dashboard{% endblock %}</h2>
+                </div>
+                <div class="header-right">
+                    <div class="header-date" id="currentDate"></div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <main class="content-area">
+                {% block content %}{% endblock %}
+            </main>
         </div>
-        <div class="nav-links">
-            <a href="{% url 'dashboard:index' %}" class="nav-link active">Dashboard</a>
-        </div>
-    </nav>
+    </div>
 
-    <main class="main-content">
-        {% block content %}{% endblock %}
-    </main>
-
-    <footer class="footer">
-        <p>Air Quality Prediction System &mdash; Kathmandu (27.72°N, 85.32°E)</p>
-    </footer>
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const dateElement = document.getElementById('currentDate');
+        if (dateElement) {
+            const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+            dateElement.textContent = new Date().toLocaleDateString('en-US', options);
+        }
+    </script>
     {% block extra_scripts %}{% endblock %}
 </body>
 </html>

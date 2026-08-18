@@ -1,0 +1,117 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Anomaly Detection{% endblock %}
+{% block page_title %}Anomaly Detection{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <h1>Anomaly Detection</h1>
+    <p class="subtitle">Isolation Forest results for the latest and recent readings</p>
+</div>
+
+{% if latest %}
+
+<!-- Latest reading + anomaly status -->
+<div class="aqi-hero-grid">
+    <div class="card aqi-hero-card {{ latest.aqi_css_class }}">
+        <span class="card-label">Latest Reading</span>
+        <span class="aqi-number">{{ latest.aqi }}</span>
+        <span class="aqi-category">{{ latest.aqi_label }}</span>
+        <span class="aqi-meaning">{{ latest.aqi_meaning }}</span>
+    </div>
+
+    <div class="card aqi-hero-card">
+        <span class="card-label">Detection Result</span>
+        {% if anomaly.is_anomaly is not None %}
+        <span class="aqi-number" style="font-size:2rem;">{% if anomaly.is_anomaly %}⚠️{% else %}✅{% endif %}</span>
+        <span class="aqi-category" style="color: {% if anomaly.is_anomaly %}var(--aqi-poor){% else %}var(--aqi-good){% endif %};">
+            {% if anomaly.is_anomaly %}Anomaly Detected{% else %}Normal{% endif %}
+        </span>
+        <span class="aqi-meaning">Isolation Forest output: {{ anomaly.raw }}</span>
+        {% else %}
+        <span class="aqi-number">&mdash;</span>
+        <span class="aqi-category">Unavailable</span>
+        <span class="aqi-meaning">Anomaly detection currently unavailable.</span>
+        {% endif %}
+        {% if anomaly.error %}
+        <span class="card-error">{{ anomaly.error }}</span>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Anomaly description -->
+{% if anomaly.is_anomaly is not None %}
+<div class="card anomaly-status-card {% if anomaly.is_anomaly %}anomaly-alert{% else %}anomaly-ok{% endif %}" style="margin-bottom:2rem;">
+    <span class="anomaly-icon">{% if anomaly.is_anomaly %}⚠️{% else %}✅{% endif %}</span>
+    <div>
+        <div class="anomaly-title">{% if anomaly.is_anomaly %}ANOMALY DETECTED{% else %}NORMAL READING{% endif %}</div>
+        <div class="anomaly-desc">
+            {% if anomaly.is_anomaly %}
+            This reading shows an unusual pollution pattern. The pollutant levels deviate significantly from typical readings.
+            {% else %}
+            No unusual pollution pattern detected. The pollutant levels are within the expected range.
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Recent anomaly results table -->
+<div class="section">
+    <h2>Recent Readings &amp; Anomaly Status</h2>
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>AQI</th>
+                    <th>PM2.5</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in recent %}
+                <tr>
+                    <td>{{ row.timestamp }}</td>
+                    <td><span class="aqi-badge aqi-{{ row.aqi }}">{{ row.aqi }}</span></td>
+                    <td>{{ row.pm2_5 }}</td>
+                    <td>
+                        {% if row.is_anomaly is not None %}
+                        <span class="card-anomaly {% if row.is_anomaly %}anomaly-alert-badge{% else %}anomaly-ok-badge{% endif %}">
+                            {% if row.is_anomaly %}Anomaly{% else %}Normal{% endif %}
+                        </span>
+                        {% else %}
+                        <span class="card-error">{{ row.anomaly_error }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- <div class="section">
+    <h2>About the Model</h2>
+    <div class="card info-card">
+        <p>The dashboard uses a pre-trained <strong>Isolation Forest</strong> model saved as
+        <code>ML/saved_models/isolation_forest.pkl</code>. For each reading it evaluates the features
+        <code>aqi, pm2_5, pm10, co, no2, o3, so2</code> and returns:</p>
+        <ul class="info-list">
+            <li><code>1</code> &mdash; normal reading</li>
+            <li><code>-1</code> &mdash; anomalous reading</li>
+        </ul>
+    </div>
+</div> -->
+
+{% else %}
+
+<div class="empty-state">
+    <div class="empty-icon">📡</div>
+    <p>No air quality data available.</p>
+</div>
+
+{% endif %}
+
+{% endblock %}
