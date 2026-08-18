@@ -1,0 +1,73 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}About Project{% endblock %}
+{% block page_title %}About Project{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <h1>About the Project</h1>
+    <p class="subtitle">Air Quality Prediction and Anomaly Detection System</p>
+</div>
+
+<div class="section">
+    <h2>Overview</h2>
+    <div class="card info-card">
+        <p>
+            This project predicts the Air Quality Index (AQI) and detects unusual pollution levels using
+            Machine Learning. Air quality data is collected in real time from the OpenWeatherMap Air
+            Pollution API for Kathmandu (27.72&deg;N, 85.32&deg;E), stored in a SQLite database, and used
+            to train prediction and anomaly-detection models.
+        </p>
+    </div>
+</div>
+
+<div class="section">
+    <h2>Key Features</h2>
+    <div class="features-grid">
+        <div class="card feature-card">
+            <span class="card-label">Live AQI Monitoring</span>
+            <p>Latest pollutant concentrations and AQI from the local database with health recommendations.</p>
+        </div>
+        <div class="card feature-card">
+            <span class="card-label">AQI Prediction</span>
+            <p>Random Forest model predicts the AQI from pollutant levels and time features.</p>
+        </div>
+        <div class="card feature-card">
+            <span class="card-label">Historical Trends</span>
+            <p>Line charts of AQI and PM2.5 over time from the stored records.</p>
+        </div>
+        <div class="card feature-card">
+            <span class="card-label">Anomaly Detection</span>
+            <p>Isolation Forest flags unusual air-quality readings.</p>
+        </div>
+    </div>
+</div>
+
+<div class="section">
+    <h2>Technologies</h2>
+    <div class="card info-card">
+        <ul class="info-list">
+            <li><strong>Data collection:</strong> Python, OpenWeatherMap API, APScheduler</li>
+            <li><strong>Database:</strong> SQLite</li>
+            <li><strong>Preprocessing &amp; EDA:</strong> Pandas, NumPy, Matplotlib</li>
+            <li><strong>Machine Learning:</strong> scikit-learn (Random Forest, Isolation Forest)</li>
+            <li><strong>Web application:</strong> Django</li>
+        </ul>
+    </div>
+</div>
+
+<div class="section">
+    <h2>OpenWeatherMap AQI Scale</h2>
+    <div class="card info-card">
+        <ul class="info-list">
+            <li><strong style="color: var(--aqi-good);">1 &mdash; Good</strong> &mdash; Air quality is good</li>
+            <li><strong style="color: var(--aqi-fair);">2 &mdash; Fair</strong> &mdash; Air quality is acceptable</li>
+            <li><strong style="color: var(--aqi-moderate);">3 &mdash; Moderate</strong> &mdash; Some pollution is present</li>
+            <li><strong style="color: var(--aqi-poor);">4 &mdash; Poor</strong> &mdash; Air quality is unhealthy</li>
+            <li><strong style="color: var(--aqi-very-poor);">5 &mdash; Very Poor</strong> &mdash; Air quality is very unhealthy</li>
+        </ul>
+    </div>
+</div>
+
+{% endblock %}
