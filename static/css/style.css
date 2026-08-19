@@ -18,18 +18,28 @@
     --border-color: #E5E7EB;
     --radius: 12px;
 
-    /* AQI category colors */
-    --aqi-good: #10B981; 
-    --aqi-fair: #F59E0B; 
-    --aqi-moderate: #F97316; 
-    --aqi-poor: #EF4444; 
-    --aqi-very-poor: #991B1B; 
+    /* AQI category colors — EPA 0–500 scale */
+    --aqi-good: #22C55E;
+    --aqi-moderate: #EAB308;
+    --aqi-usg: #F97316;
+    --aqi-unhealthy: #EF4444;
+    --aqi-very-unhealthy: #8F3F97;
+    --aqi-hazardous: #7E0023;
 
     --aqi-good-bg: #D1FAE5;
-    --aqi-fair-bg: #FEF3C7;
-    --aqi-moderate-bg: #FFEDD5;
-    --aqi-poor-bg: #FEE2E2;
-    --aqi-very-poor-bg: #FECACA;
+    --aqi-moderate-bg: #FEF3C7;
+    --aqi-usg-bg: #FFEDD5;
+    --aqi-unhealthy-bg: #FEE2E2;
+    --aqi-very-unhealthy-bg: #F3E8FF;
+    --aqi-hazardous-bg: #FECACA;
+
+    /* Legacy aliases for backwards compatibility */
+    --aqi-fair: var(--aqi-moderate);
+    --aqi-poor: var(--aqi-unhealthy);
+    --aqi-very-poor: var(--aqi-hazardous);
+    --aqi-fair-bg: var(--aqi-moderate-bg);
+    --aqi-poor-bg: var(--aqi-unhealthy-bg);
+    --aqi-very-poor-bg: var(--aqi-hazardous-bg);
 
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
     --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -304,12 +314,18 @@ body {
 .comparison-neutral { background: var(--aqi-fair-bg); color: var(--aqi-fair); border-color: rgba(245,158,11,0.2); }
 
 
-/* Colors for AQI Text */
+/* Colors for AQI Text — EPA 0–500 scale */
 .aqi-good .aqi-number, .aqi-good .aqi-category { color: var(--aqi-good); }
-.aqi-fair .aqi-number, .aqi-fair .aqi-category { color: var(--aqi-fair); }
 .aqi-moderate .aqi-number, .aqi-moderate .aqi-category { color: var(--aqi-moderate); }
-.aqi-poor .aqi-number, .aqi-poor .aqi-category { color: var(--aqi-poor); }
-.aqi-very-poor .aqi-number, .aqi-very-poor .aqi-category { color: var(--aqi-very-poor); }
+.aqi-usg .aqi-number, .aqi-usg .aqi-category { color: var(--aqi-usg); }
+.aqi-unhealthy .aqi-number, .aqi-unhealthy .aqi-category { color: var(--aqi-unhealthy); }
+.aqi-very-unhealthy .aqi-number, .aqi-very-unhealthy .aqi-category { color: var(--aqi-very-unhealthy); }
+.aqi-hazardous .aqi-number, .aqi-hazardous .aqi-category { color: var(--aqi-hazardous); }
+
+/* Legacy color aliases */
+.aqi-fair .aqi-number, .aqi-fair .aqi-category { color: var(--aqi-moderate); }
+.aqi-poor .aqi-number, .aqi-poor .aqi-category { color: var(--aqi-unhealthy); }
+.aqi-very-poor .aqi-number, .aqi-very-poor .aqi-category { color: var(--aqi-hazardous); }
 
 /* Other Grid layouts */
 .health-section {
@@ -407,19 +423,24 @@ body {
     border-bottom: none;
 }
 
-/* Badges */
+/* Badges — EPA 0–500 scale */
 .aqi-badge {
     padding: 0.25rem 0.75rem;
     border-radius: 999px;
     font-size: 0.75rem;
     font-weight: 600;
     color: white;
+    display: inline-block;
+}
+.aqi-badge.aqi-badge-range {
+    min-width: 3rem;
+    text-align: center;
 }
 .aqi-badge.aqi-1 { background: var(--aqi-good); }
-.aqi-badge.aqi-2 { background: var(--aqi-fair); }
-.aqi-badge.aqi-3 { background: var(--aqi-moderate); }
-.aqi-badge.aqi-4 { background: var(--aqi-poor); }
-.aqi-badge.aqi-5 { background: var(--aqi-very-poor); }
+.aqi-badge.aqi-2 { background: var(--aqi-moderate); }
+.aqi-badge.aqi-3 { background: var(--aqi-usg); }
+.aqi-badge.aqi-4 { background: var(--aqi-unhealthy); }
+.aqi-badge.aqi-5 { background: var(--aqi-hazardous); }
 
 /* Anomaly specific */
 .anomaly-status-card {

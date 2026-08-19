@@ -13,93 +13,127 @@ AIR_QUALITY_DB_PATH = Path(settings.BASE_DIR) / 'database' / 'air_quality.db'
 
 
 # ─────────────────────────────────────────────────────────────
-#  Centralized AQI Classification
+#  Centralized AQI Classification (U.S. EPA 0–500 scale)
 # ─────────────────────────────────────────────────────────────
 
 AQI_INFO = {
-    1: {
-        'value': 1,
+    'good': {
+        'range': (0, 50),
         'category': 'Good',
-        'meaning': 'Air quality is good.',
+        'meaning': 'Air quality is satisfactory, and air pollution poses little or no risk.',
         'css_class': 'aqi-good',
-        'color': '#2E7D32',
+        'color': '#00E400',
         'icon': '😊',
         'health_recommendation': (
-            'Air quality is suitable for normal outdoor activities.'
+            'Air quality is satisfactory and poses little or no risk. '
+            'Ideal for all outdoor activities.'
         ),
         'suggestions': [
-            'Outdoor activities are generally suitable.',
-            'Normal daily activities can continue.',
+            'Outdoor activities are fully suitable.',
+            'No health risk from current air quality.',
         ],
     },
-    2: {
-        'value': 2,
-        'category': 'Fair',
-        'meaning': 'Air quality is acceptable.',
-        'css_class': 'aqi-fair',
-        'color': '#9E9D24',
+    'moderate': {
+        'range': (51, 100),
+        'category': 'Moderate',
+        'meaning': 'Air quality is acceptable, but some pollutants may concern sensitive individuals.',
+        'css_class': 'aqi-moderate',
+        'color': '#FFFF00',
         'icon': '🙂',
         'health_recommendation': (
-            'Most people can continue normal outdoor activities. '
-            'Sensitive individuals should monitor their symptoms.'
+            'Air quality is acceptable. Unusually sensitive people should '
+            'consider reducing prolonged outdoor exertion.'
         ),
         'suggestions': [
-            'Normal outdoor activities are generally acceptable.',
-            'Sensitive individuals may monitor air quality.',
+            'Generally acceptable for most people.',
+            'Sensitive individuals may consider limiting prolonged outdoor exertion.',
         ],
     },
-    3: {
-        'value': 3,
-        'category': 'Moderate',
-        'meaning': 'Some pollution is present.',
-        'css_class': 'aqi-moderate',
-        'color': '#EF6C00',
+    'usg': {
+        'range': (101, 150),
+        'category': 'Unhealthy for Sensitive Groups',
+        'meaning': 'Members of sensitive groups may experience health effects.',
+        'css_class': 'aqi-usg',
+        'color': '#FF7E00',
         'icon': '😐',
         'health_recommendation': (
-            'Sensitive individuals should consider reducing '
-            'prolonged outdoor activities.'
+            'Sensitive groups (children, elderly, people with lung disease or '
+            'heart disease) should reduce prolonged outdoor exertion. '
+            'General public is less likely to be affected.'
         ),
         'suggestions': [
-            'Consider limiting prolonged outdoor activities.',
-            'Sensitive individuals should take extra care.',
+            'Sensitive groups should limit prolonged outdoor exertion.',
+            'General public: enjoy outdoor activities, but pay attention.',
             'Consider checking air quality before outdoor exercise.',
         ],
     },
-    4: {
-        'value': 4,
-        'category': 'Poor',
-        'meaning': 'Air quality is unhealthy.',
-        'css_class': 'aqi-poor',
-        'color': '#C62828',
+    'unhealthy': {
+        'range': (151, 200),
+        'category': 'Unhealthy',
+        'meaning': 'Everyone may begin to experience health effects.',
+        'css_class': 'aqi-unhealthy',
+        'color': '#FF0000',
         'icon': '😷',
         'health_recommendation': (
-            'Consider reducing prolonged outdoor activities, '
-            'especially for sensitive individuals.'
+            'Everyone should reduce prolonged outdoor exertion. '
+            'Sensitive groups should avoid outdoor exertion entirely.'
         ),
         'suggestions': [
-            'Reduce prolonged outdoor exposure.',
+            'Everyone should limit prolonged outdoor exposure.',
+            'Sensitive groups should avoid outdoor exertion.',
             'Consider indoor activities when possible.',
-            'Sensitive individuals should take extra precautions.',
         ],
     },
-    5: {
-        'value': 5,
-        'category': 'Very Poor',
-        'meaning': 'Air quality is very unhealthy.',
-        'css_class': 'aqi-very-poor',
-        'color': '#8E0000',
+    'very_unhealthy': {
+        'range': (201, 300),
+        'category': 'Very Unhealthy',
+        'meaning': 'Health alert: everyone may experience more serious health effects.',
+        'css_class': 'aqi-very-unhealthy',
+        'color': '#8F3F97',
         'icon': '🤢',
         'health_recommendation': (
-            'Avoid or reduce outdoor activities, particularly '
-            'for sensitive individuals.'
+            'Health alert: everyone may experience serious health effects. '
+            'Avoid all outdoor exertion. Keep windows closed.'
         ),
         'suggestions': [
-            'Avoid prolonged outdoor exposure.',
-            'Consider staying indoors when possible.',
+            'Avoid all outdoor physical activities.',
+            'Keep windows and doors closed.',
+            'Use air purifiers indoors if available.',
             'Monitor air quality updates regularly.',
         ],
     },
+    'hazardous': {
+        'range': (301, 500),
+        'category': 'Hazardous',
+        'meaning': 'Health emergency: the entire population is affected.',
+        'css_class': 'aqi-hazardous',
+        'color': '#7E0023',
+        'icon': '☠',
+        'health_recommendation': (
+            'Health emergency! The entire population is likely to be affected. '
+            'Stay indoors, keep all windows closed, and avoid all outdoor activity.'
+        ),
+        'suggestions': [
+            'Stay indoors with windows and doors closed.',
+            'Avoid ALL outdoor activities.',
+            'Use air purification systems at maximum capacity.',
+            'Seek medical attention if experiencing symptoms.',
+            'Monitor emergency broadcasts for updates.',
+        ],
+    },
 }
+
+# Ordered list for range lookup
+_AQI_RANGES = [
+    ('good', 0, 50),
+    ('moderate', 51, 100),
+    ('usg', 101, 150),
+    ('unhealthy', 151, 200),
+    ('very_unhealthy', 201, 300),
+    ('hazardous', 301, 500),
+]
+
+_AQI_KEYS_BY_NAME = {k: k for k in ['good', 'moderate', 'usg', 'unhealthy', 'very_unhealthy', 'hazardous']}
 
 # Fallback for any unexpected AQI value
 _AQI_FALLBACK = {
@@ -149,18 +183,25 @@ POLLUTANT_INFO = {
 
 
 def get_aqi_info(aqi):
-    """Return the full AQI classification dict for a given AQI value.
+    """Return the full AQI classification dict for a given AQI value (0–500).
 
     Returns a dict with: value, category, meaning, css_class, color,
     icon, health_recommendation, suggestions.
     """
     if aqi is None:
         return dict(_AQI_FALLBACK)
-    # Clamp to 1–5 range for safety
-    clamped = max(1, min(5, int(aqi)))
-    info = dict(AQI_INFO.get(clamped, _AQI_FALLBACK))
-    info['value'] = int(aqi)
-    return info
+    aqi = int(aqi)
+    for key, lo, hi in _AQI_RANGES:
+        if lo <= aqi <= hi:
+            info = dict(AQI_INFO[key])
+            info['value'] = aqi
+            return info
+    # Above 500
+    if aqi > 500:
+        info = dict(AQI_INFO['hazardous'])
+        info['value'] = aqi
+        return info
+    return dict(_AQI_FALLBACK)
 
 
 def get_aqi_category(aqi):
@@ -195,13 +236,14 @@ def compare_aqi(current_aqi, predicted_aqi):
             'icon': '—',
             'css_class': 'comparison-neutral',
         }
-    if predicted_aqi > current_aqi:
+    diff = predicted_aqi - current_aqi
+    if diff > 10:
         return {
             'text': 'Air quality may worsen.',
             'icon': '⚠',
             'css_class': 'comparison-worse',
         }
-    if predicted_aqi < current_aqi:
+    if diff < -10:
         return {
             'text': 'Air quality may improve.',
             'icon': '✓',
@@ -245,7 +287,8 @@ def _connect():
 def get_latest_reading():
     """Return the most recent air_quality record as a dict, or None.
 
-    The returned dict is enriched with full AQI classification info.
+    The returned dict is enriched with full AQI classification info
+    based on the calculated EPA AQI (0–500 scale).
     """
     try:
         conn = _connect()
@@ -262,7 +305,8 @@ def get_latest_reading():
         return None
 
     reading = dict(row)
-    aqi_info = get_aqi_info(reading.get('aqi'))
+    calc_aqi = reading.get('calculated_aqi')
+    aqi_info = get_aqi_info(calc_aqi)
     reading['aqi_label'] = aqi_info['category']
     reading['aqi_color'] = aqi_info['color']
     reading['aqi_css_class'] = aqi_info['css_class']
@@ -313,7 +357,7 @@ def get_historical_data(limit=200):
         conn = _connect()
         try:
             rows = conn.execute(
-                'SELECT timestamp, aqi, pm2_5 '
+                'SELECT timestamp, calculated_aqi, aqi, pm2_5 '
                 'FROM air_quality ORDER BY id DESC LIMIT ?', (limit,)
             ).fetchall()
         finally:
@@ -322,4 +366,10 @@ def get_historical_data(limit=200):
         return []
 
     # Reverse so oldest comes first (charts draw left → right in time)
-    return [dict(row) for row in reversed(rows)]
+    result = []
+    for row in reversed(rows):
+        d = dict(row)
+        # Use calculated_aqi as the display AQI; fall back to api aqi
+        d['aqi'] = d.pop('calculated_aqi') or d.pop('aqi')
+        result.append(d)
+    return result

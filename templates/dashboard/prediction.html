@@ -7,7 +7,7 @@
 
 <div class="page-header">
     <h1>AQI Prediction</h1>
-    <p class="subtitle">Random Forest model prediction based on the latest reading</p>
+    <p class="subtitle">Random Forest model prediction (EPA AQI 0–500 scale)</p>
 </div>
 
 {% if latest %}
@@ -17,7 +17,7 @@
     <!-- Current AQI -->
     <div class="card aqi-hero-card {{ latest.aqi_css_class }}">
         <span class="card-label">Current AQI</span>
-        <span class="aqi-number">{{ latest.aqi }}</span>
+        <span class="aqi-number">{{ latest.calculated_aqi }}</span>
         <span class="aqi-category">{{ latest.aqi_label }}</span>
         <span class="aqi-meaning">{{ latest.aqi_meaning }}</span>
     </div>
@@ -45,7 +45,7 @@
 <div class="card comparison-card {{ comparison.css_class }}">
     <span class="comparison-icon">{{ comparison.icon }}</span>
     <span>
-        Current AQI: <strong>{{ latest.aqi }}</strong>
+        Current AQI: <strong>{{ latest.calculated_aqi }}</strong>
         &nbsp;&bull;&nbsp;
         Predicted AQI: <strong>{% if prediction.aqi is not None %}{{ prediction.aqi }}{% else %}&mdash;{% endif %}</strong>
         &nbsp;&mdash;&nbsp;
@@ -60,9 +60,9 @@
     <div class="card health-card">
         <div class="section-title">📊 Prediction Details</div>
         <p>
-            Current AQI: <strong>{{ latest.aqi }}</strong> ({{ latest.aqi_label }})<br>
+            Current AQI: <strong>{{ latest.calculated_aqi }}</strong> ({{ latest.aqi_label }})<br>
             Predicted AQI: <strong>{{ prediction.aqi }}</strong> ({{ predicted_aqi_info.category }})<br>
-            Difference: <strong>{% widthratio prediction.aqi 1 1 %}</strong> vs <strong>{{ latest.aqi }}</strong>
+            Difference: <strong>{{ prediction.aqi|add:"-" }}{{ latest.calculated_aqi }}</strong> points
         </p>
     </div>
     <div class="card health-card">
@@ -88,21 +88,6 @@
     </div>
 </div>
 {% endif %}
-
-<!-- About the Model -->
-<!-- <div class="section">
-    <h2>About the Model</h2>
-    <div class="card info-card">
-        <p>The dashboard uses a pre-trained <strong>Random Forest Regressor</strong> model saved as
-        <code>ML/saved_models/random_forest.pkl</code>. It predicts the AQI from the latest record using the
-        same feature names and order used during training:</p>
-        <ul class="info-list">
-            <li><code>pm2_5, pm10, co, no2, o3, so2</code> &mdash; pollutant concentrations</li>
-            <li><code>hour, day</code> &mdash; derived from the reading timestamp</li>
-            <li>Target: <code>aqi</code></li>
-        </ul>
-    </div>
-</div> -->
 
 {% else %}
 

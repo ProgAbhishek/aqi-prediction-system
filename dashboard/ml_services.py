@@ -1,13 +1,10 @@
 """Service layer for ML model loading and prediction for the Django dashboard.
 
-Loads the existing trained models from ML/saved_models/. The models are never
-retrained here. The prediction input is built from the trained model's own
-feature_names_in_ attribute, so feature names and order always match training.
+Loads the trained models from ML/saved_models/. The new models predict on
+the U.S. EPA AQI (0–500) scale rather than the OpenWeatherMap 1–5 scale.
 
-Note: the venv runs Python 3.14 with scikit-learn 1.9.0 while the model was
-trained under scikit-learn 1.6.0. Predictions were verified to be identical on
-both versions for the current model, so the InconsistentVersionWarning raised on
-load is suppressed below.
+The prediction input is built from the trained model's own
+feature_names_in_ attribute, so feature names and order always match training.
 """
 
 import warnings
@@ -17,8 +14,13 @@ from pathlib import Path
 import numpy as np
 from django.conf import settings
 
-RANDOM_FOREST_PATH = Path(settings.BASE_DIR) / 'ML' / 'saved_models' / 'random_forest.pkl'
-ISOLATION_FOREST_PATH = Path(settings.BASE_DIR) / 'ML' / 'saved_models' / 'isolation_forest.pkl'
+# New models trained on EPA AQI (0–500)
+RANDOM_FOREST_PATH = Path(settings.BASE_DIR) / 'ML' / 'saved_models' / 'random_forest_aqi_500.pkl'
+ISOLATION_FOREST_PATH = Path(settings.BASE_DIR) / 'ML' / 'saved_models' / 'isolation_forest_aqi_500.pkl'
+
+# Fallback to legacy models if new ones don't exist yet
+RANDOM_FOREST_LEGACY = Path(settings.BASE_DIR) / 'ML' / 'saved_models' / 'random_forest.pkl'
+ISOLATION_FOREST_LEGACY = Path(settings.BASE_DIR) / 'ML' / 'saved_models' / 'isolation_forest.pkl'
 
 _rf_model = None
 _rf_error = None
@@ -37,8 +39,9 @@ def _load_random_forest():
         from sklearn.exceptions import InconsistentVersionWarning
         with warnings.catch_warnings():
             warnings.simplefilter('ignore', InconsistentVersionWarning)
-            _rf_model = joblib.load(str(RANDOM_FOREST_PATH))
-    except Exception as exc:  # surface any load failure to the caller
+            path = RANDOM_FOREST_PATH if RANDOM_FOREST_PATH.exists() else RANDOM_FOREST_LEGACY
+            _rf_model = joblib.load(str(path))
+    except Exception as exc:
         _rf_error = str(exc)
         _rf_model = None
     return _rf_model
@@ -55,8 +58,9 @@ def _load_isolation_forest():
         from sklearn.exceptions import InconsistentVersionWarning
         with warnings.catch_warnings():
             warnings.simplefilter('ignore', InconsistentVersionWarning)
-            _if_model = joblib.load(str(ISOLATION_FOREST_PATH))
-    except Exception as exc:  # surface any load failure to the caller
+            path = ISOLATION_FOREST_PATH if ISOLATION_FOREST_PATH.exists() else ISOLATION_FOREST_LEGACY
+            _if_model = joblib.load(str(path))
+    except Exception as exc:
         _if_error = str(exc)
         _if_model = None
     return _if_model
@@ -76,8 +80,7 @@ def predict_aqi(reading):
     """Predict AQI for a reading dict using the trained Random Forest.
 
     The model was trained on ['pm2_5', 'pm10', 'co', 'no2', 'o3', 'so2',
-    'hour', 'day'] -> aqi. hour/day are derived from the reading's timestamp
-    exactly like the preprocessing notebook (timestamp.dt.hour, dt.day).
+    'hour', 'day'] -> calculated_aqi (0–500).
 
     Returns {'aqi': int} or {'error': message}.
     """
@@ -103,17 +106,19 @@ def predict_aqi(reading):
         return {'error': f'Invalid feature value: {exc}'}
 
     with warnings.catch_warnings():
-        warnings.simplefilter('ignore', UserWarning)  # "X does not have valid feature names"
+        warnings.simplefilter('ignore', UserWarning)
         prediction = model.predict(np.array([sample]))[0]
 
-    return {'aqi': int(round(prediction)), 'raw': float(prediction)}
+    # Clamp to valid AQI range
+    aqi_val = max(0, min(500, int(round(prediction))))
+    return {'aqi': aqi_val, 'raw': float(prediction)}
 
 
 def predict_anomaly(reading):
     """Run Isolation Forest anomaly detection on a reading dict.
 
-    The model was trained on ['aqi', 'pm2_5', 'pm10', 'co', 'no2', 'o3',
-    'so2'] (all available directly from the latest record). Returns
+    The model was trained on ['calculated_aqi', 'pm2_5', 'pm10', 'co', 'no2',
+    'o3', 'so2'] (all available directly from the latest record). Returns
     {'is_anomaly': False} for a model output of 1 (Normal) and
     {'is_anomaly': True} for -1 (Anomaly), or {'error': message}.
     """
@@ -123,16 +128,22 @@ def predict_anomaly(reading):
 
     feature_names = list(model.feature_names_in_)
 
+    # Build the reading dict with the right key names for the model
+    row = dict(reading)
+    # The new model uses 'calculated_aqi'; map from 'calculated_aqi' in DB
+    if 'calculated_aqi' in feature_names and 'calculated_aqi' not in row:
+        row['calculated_aqi'] = row.get('aqi')
+
     try:
-        sample = [float(reading[name]) for name in feature_names]
+        sample = [float(row[name]) for name in feature_names]
     except (KeyError, TypeError, ValueError) as exc:
-        missing = [name for name in feature_names if name not in reading]
+        missing = [name for name in feature_names if name not in row]
         if missing:
             return {'error': f'Model expects features not available in the data: {missing}'}
         return {'error': f'Invalid feature value: {exc}'}
 
     with warnings.catch_warnings():
-        warnings.simplefilter('ignore', UserWarning)  # "X does not have valid feature names"
+        warnings.simplefilter('ignore', UserWarning)
         prediction = model.predict(np.array([sample]))[0]
 
     return {'is_anomaly': int(prediction) == -1, 'raw': int(prediction)}

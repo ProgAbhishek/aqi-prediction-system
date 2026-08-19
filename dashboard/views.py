@@ -27,7 +27,7 @@ def index(request):
     if prediction and prediction.get('aqi') is not None:
         predicted_aqi_info = services.get_aqi_info(prediction['aqi'])
         comparison = services.compare_aqi(
-            latest['aqi'] if latest else None,
+            latest.get('calculated_aqi') if latest else None,
             prediction['aqi'],
         )
 
@@ -59,7 +59,7 @@ def prediction(request):
     if prediction and prediction.get('aqi') is not None:
         predicted_aqi_info = services.get_aqi_info(prediction['aqi'])
         comparison = services.compare_aqi(
-            latest['aqi'] if latest else None,
+            latest.get('calculated_aqi') if latest else None,
             prediction['aqi'],
         )
 

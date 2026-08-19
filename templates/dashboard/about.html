@@ -19,6 +19,12 @@
             Pollution API for Kathmandu (27.72&deg;N, 85.32&deg;E), stored in a SQLite database, and used
             to train prediction and anomaly-detection models.
         </p>
+        <p style="margin-top:0.75rem;">
+            The AQI is calculated using the <strong>U.S. EPA breakpoint interpolation method</strong>,
+            producing values on the standard <strong>0–500 scale</strong>. The API provides raw pollutant
+            concentrations in μg/m³, which are converted to the appropriate EPA units (ppm for CO, ppb for
+            NO₂, O₃, SO₂) before applying the breakpoint tables.
+        </p>
     </div>
 </div>
 
@@ -27,11 +33,11 @@
     <div class="features-grid">
         <div class="card feature-card">
             <span class="card-label">Live AQI Monitoring</span>
-            <p>Latest pollutant concentrations and AQI from the local database with health recommendations.</p>
+            <p>Latest pollutant concentrations and EPA AQI from the local database with health recommendations.</p>
         </div>
         <div class="card feature-card">
             <span class="card-label">AQI Prediction</span>
-            <p>Random Forest model predicts the AQI from pollutant levels and time features.</p>
+            <p>Random Forest model predicts the EPA AQI (0–500) from pollutant levels and time features.</p>
         </div>
         <div class="card feature-card">
             <span class="card-label">Historical Trends</span>
@@ -53,20 +59,35 @@
             <li><strong>Preprocessing &amp; EDA:</strong> Pandas, NumPy, Matplotlib</li>
             <li><strong>Machine Learning:</strong> scikit-learn (Random Forest, Isolation Forest)</li>
             <li><strong>Web application:</strong> Django</li>
+            <li><strong>AQI Calculation:</strong> U.S. EPA breakpoint interpolation (0–500 scale)</li>
         </ul>
     </div>
 </div>
 
 <div class="section">
-    <h2>OpenWeatherMap AQI Scale</h2>
+    <h2>U.S. EPA AQI Scale (0–500)</h2>
     <div class="card info-card">
         <ul class="info-list">
-            <li><strong style="color: var(--aqi-good);">1 &mdash; Good</strong> &mdash; Air quality is good</li>
-            <li><strong style="color: var(--aqi-fair);">2 &mdash; Fair</strong> &mdash; Air quality is acceptable</li>
-            <li><strong style="color: var(--aqi-moderate);">3 &mdash; Moderate</strong> &mdash; Some pollution is present</li>
-            <li><strong style="color: var(--aqi-poor);">4 &mdash; Poor</strong> &mdash; Air quality is unhealthy</li>
-            <li><strong style="color: var(--aqi-very-poor);">5 &mdash; Very Poor</strong> &mdash; Air quality is very unhealthy</li>
+            <li><strong style="color: #22C55E;">0–50 &mdash; Good</strong> &mdash; Air quality is satisfactory, little or no risk</li>
+            <li><strong style="color: #EAB308;">51–100 &mdash; Moderate</strong> &mdash; Acceptable; sensitive individuals may be affected</li>
+            <li><strong style="color: #F97316;">101–150 &mdash; Unhealthy for Sensitive Groups</strong> &mdash; Sensitive groups may experience health effects</li>
+            <li><strong style="color: #EF4444;">151–200 &mdash; Unhealthy</strong> &mdash; Everyone may begin to experience health effects</li>
+            <li><strong style="color: #8F3F97;">201–300 &mdash; Very Unhealthy</strong> &mdash; Health alert: everyone may experience serious effects</li>
+            <li><strong style="color: #7E0023;">301–500 &mdash; Hazardous</strong> &mdash; Health emergency for the entire population</li>
         </ul>
+    </div>
+</div>
+
+<div class="section">
+    <h2>AQI Calculation Methodology</h2>
+    <div class="card info-card">
+        <p>The AQI is calculated using the U.S. EPA breakpoint interpolation formula:</p>
+        <div style="background:#f3f4f6; padding:1rem; border-radius:8px; margin:0.75rem 0; font-family:monospace; font-size:0.85rem;">
+            AQI = ((AQI<sub>high</sub> - AQI<sub>low</sub>) / (BP<sub>high</sub> - BP<sub>low</sub>)) &times; (C - BP<sub>low</sub>) + AQI<sub>low</sub>
+        </div>
+        <p>Where C is the pollutant concentration. The overall AQI is the <strong>maximum</strong> of the individual sub-indices for PM2.5, PM10, CO, NO₂, O₃, and SO₂.</p>
+        <p style="margin-top:0.5rem;">Pollutant concentrations from the OpenWeatherMap API (μg/m³) are converted to EPA standard units:
+        CO → ppm (MW=28.01), NO₂ → ppb (MW=46.01), O₃ → ppb (MW=48.00), SO₂ → ppb (MW=64.06), at 25°C and 1 atm.</p>
     </div>
 </div>
 

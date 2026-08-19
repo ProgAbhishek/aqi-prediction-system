@@ -7,7 +7,7 @@
 
 <div class="page-header">
     <h1>Historical Data</h1>
-    <p class="subtitle">AQI and PM2.5 trends from the existing database</p>
+    <p class="subtitle">AQI (EPA 0–500) and PM2.5 trends from the database</p>
 </div>
 
 <div class="charts-grid">
@@ -33,6 +33,7 @@
                 <tr>
                     <th>Timestamp</th>
                     <th>AQI</th>
+                    <th>Category</th>
                     <th>PM2.5</th>
                     <th>PM10</th>
                     <th>CO</th>
@@ -45,7 +46,8 @@
                 {% for row in recent %}
                 <tr>
                     <td>{{ row.timestamp }}</td>
-                    <td><span class="aqi-badge aqi-{{ row.aqi }}">{{ row.aqi }}</span></td>
+                    <td><span class="aqi-badge aqi-badge-range" style="background: {% if row.calculated_aqi <= 50 %}#00E400{% elif row.calculated_aqi <= 100 %}#FFFF00{% elif row.calculated_aqi <= 150 %}#FF7E00{% elif row.calculated_aqi <= 200 %}#FF0000{% elif row.calculated_aqi <= 300 %}#8F3F97{% else %}#7E0023{% endif %}; color: {% if row.calculated_aqi <= 100 %}#000{% else %}#fff{% endif %};">{{ row.calculated_aqi }}</span></td>
+                    <td>{% if row.calculated_aqi <= 50 %}Good{% elif row.calculated_aqi <= 100 %}Moderate{% elif row.calculated_aqi <= 150 %}USG{% elif row.calculated_aqi <= 200 %}Unhealthy{% elif row.calculated_aqi <= 300 %}Very Unhealthy{% else %}Hazardous{% endif %}</td>
                     <td>{{ row.pm2_5 }}</td>
                     <td>{{ row.pm10 }}</td>
                     <td>{{ row.co }}</td>
@@ -75,8 +77,15 @@ if (historicalData.length > 0) {
     const aqiValues = historicalData.map(d => d.aqi);
     const pm25Values = historicalData.map(d => d.pm2_5);
 
-    const aqiColors = { 1: '#10B981', 2: '#F59E0B', 3: '#F97316', 4: '#EF4444', 5: '#991B1B' };
-    const pointColors = aqiValues.map(v => aqiColors[v] || '#9CA3AF');
+    function aqiColor(v) {
+        if (v <= 50) return '#00E400';
+        if (v <= 100) return '#FFFF00';
+        if (v <= 150) return '#FF7E00';
+        if (v <= 200) return '#FF0000';
+        if (v <= 300) return '#8F3F97';
+        return '#7E0023';
+    }
+    const pointColors = aqiValues.map(v => aqiColor(v));
 
     const gridColor = 'rgba(0, 0, 0, 0.05)';
     const tickColor = '#6B7280';
@@ -128,9 +137,9 @@ if (historicalData.length > 0) {
                 ...commonOptions.scales,
                 y: {
                     ...commonOptions.scales.y,
-                    min: 1,
-                    max: 5,
-                    ticks: { ...commonOptions.scales.y.ticks, stepSize: 1 }
+                    min: 0,
+                    max: 500,
+                    ticks: { ...commonOptions.scales.y.ticks, stepSize: 50 }
                 }
             }
         }

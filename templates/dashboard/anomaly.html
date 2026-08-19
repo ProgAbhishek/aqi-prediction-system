@@ -16,7 +16,7 @@
 <div class="aqi-hero-grid">
     <div class="card aqi-hero-card {{ latest.aqi_css_class }}">
         <span class="card-label">Latest Reading</span>
-        <span class="aqi-number">{{ latest.aqi }}</span>
+        <span class="aqi-number">{{ latest.calculated_aqi }}</span>
         <span class="aqi-category">{{ latest.aqi_label }}</span>
         <span class="aqi-meaning">{{ latest.aqi_meaning }}</span>
     </div>
@@ -66,6 +66,7 @@
                 <tr>
                     <th>Timestamp</th>
                     <th>AQI</th>
+                    <th>Category</th>
                     <th>PM2.5</th>
                     <th>Status</th>
                 </tr>
@@ -74,7 +75,8 @@
                 {% for row in recent %}
                 <tr>
                     <td>{{ row.timestamp }}</td>
-                    <td><span class="aqi-badge aqi-{{ row.aqi }}">{{ row.aqi }}</span></td>
+                    <td><span class="aqi-badge aqi-badge-range" style="background: {% if row.calculated_aqi <= 50 %}#00E400{% elif row.calculated_aqi <= 100 %}#FFFF00{% elif row.calculated_aqi <= 150 %}#FF7E00{% elif row.calculated_aqi <= 200 %}#FF0000{% elif row.calculated_aqi <= 300 %}#8F3F97{% else %}#7E0023{% endif %}; color: {% if row.calculated_aqi <= 100 %}#000{% else %}#fff{% endif %};">{{ row.calculated_aqi }}</span></td>
+                    <td>{% if row.calculated_aqi <= 50 %}Good{% elif row.calculated_aqi <= 100 %}Moderate{% elif row.calculated_aqi <= 150 %}USG{% elif row.calculated_aqi <= 200 %}Unhealthy{% elif row.calculated_aqi <= 300 %}Very Unhealthy{% else %}Hazardous{% endif %}</td>
                     <td>{{ row.pm2_5 }}</td>
                     <td>
                         {% if row.is_anomaly is not None %}
@@ -91,19 +93,6 @@
         </table>
     </div>
 </div>
-
-<!-- <div class="section">
-    <h2>About the Model</h2>
-    <div class="card info-card">
-        <p>The dashboard uses a pre-trained <strong>Isolation Forest</strong> model saved as
-        <code>ML/saved_models/isolation_forest.pkl</code>. For each reading it evaluates the features
-        <code>aqi, pm2_5, pm10, co, no2, o3, so2</code> and returns:</p>
-        <ul class="info-list">
-            <li><code>1</code> &mdash; normal reading</li>
-            <li><code>-1</code> &mdash; anomalous reading</li>
-        </ul>
-    </div>
-</div> -->
 
 {% else %}
 

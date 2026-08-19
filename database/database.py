@@ -11,7 +11,25 @@ def get_connection():
     return sqlite3.connect(DB_PATH)
 
 
+def _ensure_columns():
+    """Add calculated_aqi and primary_pollutant columns if they don't exist."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("ALTER TABLE air_quality ADD COLUMN calculated_aqi REAL")
+    except sqlite3.OperationalError:
+        pass  # column already exists
+    try:
+        cursor.execute("ALTER TABLE air_quality ADD COLUMN primary_pollutant TEXT")
+    except sqlite3.OperationalError:
+        pass  # column already exists
+    conn.commit()
+    conn.close()
+
+
 def create_table():
+
+    _ensure_columns()
 
     conn = get_connection()
 
@@ -36,7 +54,11 @@ def create_table():
 
         o3 REAL,
 
-        so2 REAL
+        so2 REAL,
+
+        calculated_aqi REAL,
+
+        primary_pollutant TEXT
 
     );
     """)
@@ -48,6 +70,8 @@ def create_table():
 
 
 def insert_data(data):
+
+    _ensure_columns()
 
     conn = get_connection()
 
@@ -63,11 +87,13 @@ def insert_data(data):
         co,
         no2,
         o3,
-        so2
+        so2,
+        calculated_aqi,
+        primary_pollutant
 
         )
 
-        VALUES(?,?,?,?,?,?,?,?)
+        VALUES(?,?,?,?,?,?,?,?,?,?)
 
     """,(
 
@@ -78,7 +104,9 @@ def insert_data(data):
         data["co"],
         data["no2"],
         data["o3"],
-        data["so2"]
+        data["so2"],
+        data.get("calculated_aqi"),
+        data.get("primary_pollutant"),
 
     ))
 

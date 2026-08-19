@@ -7,7 +7,7 @@
 
 <div class="page-header">
     <h1>Dashboard Overview</h1>
-    <p class="subtitle">Real-time air quality monitoring and predictions</p>
+    <p class="subtitle">Real-time air quality monitoring and predictions (EPA AQI 0–500)</p>
 </div>
 
 {% if latest %}
@@ -18,7 +18,7 @@
     <!-- Current AQI -->
     <div class="card aqi-hero-card {{ latest.aqi_css_class }}">
         <span class="card-label">Current AQI</span>
-        <span class="aqi-number">{{ latest.aqi }}</span>
+        <span class="aqi-number">{{ latest.calculated_aqi }}</span>
         <span class="aqi-category">{{ latest.aqi_label }}</span>
         <span class="aqi-meaning">{{ latest.aqi_meaning }}</span>
     </div>
@@ -47,7 +47,7 @@
 <div class="card comparison-card {{ comparison.css_class }}">
     <span class="comparison-icon">{{ comparison.icon }}</span>
     <span>
-        Current AQI: <strong>{{ latest.aqi }}</strong>
+        Current AQI: <strong>{{ latest.calculated_aqi }}</strong>
         &nbsp;&bull;&nbsp;
         Predicted AQI: <strong>{% if prediction.aqi is not None %}{{ prediction.aqi }}{% else %}&mdash;{% endif %}</strong>
         &nbsp;&mdash;&nbsp;
@@ -65,6 +65,9 @@
     <div class="card health-card">
         <div class="section-title">📊 Air Quality Status</div>
         <p>{{ latest.aqi_meaning }} {{ latest.aqi_icon }}</p>
+        {% if latest.primary_pollutant %}
+        <p style="margin-top:0.5rem; font-size:0.8rem; color: var(--text-muted);">Primary pollutant: {{ latest.primary_pollutant }}</p>
+        {% endif %}
     </div>
 </div>
 
@@ -170,16 +173,17 @@ if (historicalData && historicalData.length > 0) {
 
     const aqiValues = historicalData.map(d => d.aqi);
 
-    // Map each AQI value to its category color
-    const aqiColors = {
-        1: '#10B981',
-        2: '#F59E0B',
-        3: '#F97316',
-        4: '#EF4444',
-        5: '#991B1B'
-    };
+    // Map each AQI value to its category color (EPA 0-500 scale)
+    function aqiColor(v) {
+        if (v <= 50) return '#00E400';
+        if (v <= 100) return '#FFFF00';
+        if (v <= 150) return '#FF7E00';
+        if (v <= 200) return '#FF0000';
+        if (v <= 300) return '#8F3F97';
+        return '#7E0023';
+    }
 
-    const pointColors = aqiValues.map(v => aqiColors[v] || '#9CA3AF');
+    const pointColors = aqiValues.map(v => aqiColor(v));
 
     new Chart(document.getElementById('aqiTrendChart'), {
         type: 'line',
@@ -222,10 +226,10 @@ if (historicalData && historicalData.length > 0) {
                     grid: { color: 'rgba(0,0,0,0.05)' }
                 },
                 y: {
-                    min: 1,
-                    max: 5,
+                    min: 0,
+                    max: 500,
                     ticks: {
-                        stepSize: 1,
+                        stepSize: 50,
                         color: '#6B7280',
                         font: { size: 11, family: 'Inter' }
                     },
