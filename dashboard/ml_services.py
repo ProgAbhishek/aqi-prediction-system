@@ -8,6 +8,7 @@ feature_names_in_ attribute, so feature names and order always match training.
 """
 
 import warnings
+import sqlite3
 from datetime import datetime
 from pathlib import Path
 
@@ -157,3 +158,63 @@ def annotate_anomalies(readings):
         item['anomaly_error'] = result.get('error')
         annotated.append(item)
     return annotated
+
+
+def _get_db_path():
+    return str(Path(settings.BASE_DIR) / 'database' / 'air_quality.db')
+
+
+def _mark_notified(ids):
+    """Set notified=1 for the given row IDs."""
+    if not ids:
+        return
+    conn = sqlite3.connect(_get_db_path())
+    cursor = conn.cursor()
+    placeholders = ','.join('?' * len(ids))
+    cursor.execute(
+        f"UPDATE air_quality SET notified = 1 WHERE id IN ({placeholders})",
+        ids,
+    )
+    conn.commit()
+    conn.close()
+
+
+def send_anomaly_alert(readings):
+    """Send an email for new anomalous readings not yet notified.
+
+    Returns True if an email was sent, False otherwise.
+    """
+    new_anomalies = [
+        r for r in readings
+        if r.get('is_anomaly') is True and not r.get('notified')
+    ]
+    if not new_anomalies:
+        return False
+
+    from django.core.mail import send_mail
+
+    lines = []
+    for r in new_anomalies:
+        lines.append(
+            f"  {r.get('timestamp')}  |  AQI: {r.get('calculated_aqi')}  |  "
+            f"PM2.5: {r.get('pm2_5')}  |  PM10: {r.get('pm10')}"
+        )
+    body = (
+        f"Anomalous air quality readings detected in Kathmandu:\n\n"
+        f"{'Timestamp':<22} {'AQI':>6}  {'PM2.5':>7}  {'PM10':>7}\n"
+        + "\n".join(lines)
+    )
+
+    try:
+        send_mail(
+            subject=f"AQI Alert: {len(new_anomalies)} anomalous reading(s) detected",
+            message=body,
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[settings.EMAIL_RECIPIENT],
+            fail_silently=True,
+        )
+    except Exception:
+        return False
+
+    _mark_notified([r['id'] for r in new_anomalies if r.get('id')])
+    return True
