@@ -10,6 +10,13 @@
     <p class="subtitle">Isolation Forest results for the latest and recent readings</p>
 </div>
 
+{% if email_sent %}
+<div class="card" style="background: #d1e7dd; border-left: 4px solid #0f5132; margin-bottom: 1.5rem; padding: 1rem 1.5rem;">
+    <strong style="color: #0f5132;">Email alert sent</strong>
+    <span style="color: #0f5132;"> &mdash; new anomalous readings have been reported to {{ EMAIL_RECIPIENT }}.</span>
+</div>
+{% endif %}
+
 {% if latest %}
 
 <!-- Latest reading + anomaly status -->

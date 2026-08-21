@@ -1,5 +1,6 @@
 import json
 
+from django.conf import settings
 from django.shortcuts import render
 
 from . import ml_services, services
@@ -90,11 +91,16 @@ def anomaly(request):
     """Anomaly Detection — latest status plus per-reading anomaly results."""
     latest, _, anomaly_status = _latest_snapshot()
 
+    recent = ml_services.annotate_anomalies(services.get_recent_readings(20))
+    email_sent = ml_services.send_anomaly_alert(recent)
+
     context = {
         'latest': latest,
         'anomaly': anomaly_status,
         'total_records': services.count_records(),
-        'recent': ml_services.annotate_anomalies(services.get_recent_readings(20)),
+        'recent': recent,
+        'email_sent': email_sent,
+        'EMAIL_RECIPIENT': settings.EMAIL_RECIPIENT,
     }
     return render(request, 'dashboard/anomaly.html', context)
 

@@ -23,6 +23,10 @@ def _ensure_columns():
         cursor.execute("ALTER TABLE air_quality ADD COLUMN primary_pollutant TEXT")
     except sqlite3.OperationalError:
         pass  # column already exists
+    try:
+        cursor.execute("ALTER TABLE air_quality ADD COLUMN notified INTEGER DEFAULT 0")
+    except sqlite3.OperationalError:
+        pass  # column already exists
     conn.commit()
     conn.close()
 
