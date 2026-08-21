@@ -1,7 +1,7 @@
 """Service layer for ML model loading and prediction for the Django dashboard.
 
-Loads the trained models from ML/saved_models/. The new models predict on
-the U.S. EPA AQI (0–500) scale rather than the OpenWeatherMap 1–5 scale.
+Loads trained models from ML/saved_models/. Models predict on the U.S. EPA
+AQI (0–500) scale calculated via breakpoint interpolation.
 
 The prediction input is built from the trained model's own
 feature_names_in_ attribute, so feature names and order always match training.
@@ -14,13 +14,8 @@ from pathlib import Path
 import numpy as np
 from django.conf import settings
 
-# New models trained on EPA AQI (0–500)
 RANDOM_FOREST_PATH = Path(settings.BASE_DIR) / 'ML' / 'saved_models' / 'random_forest_aqi_500.pkl'
 ISOLATION_FOREST_PATH = Path(settings.BASE_DIR) / 'ML' / 'saved_models' / 'isolation_forest_aqi_500.pkl'
-
-# Fallback to legacy models if new ones don't exist yet
-RANDOM_FOREST_LEGACY = Path(settings.BASE_DIR) / 'ML' / 'saved_models' / 'random_forest.pkl'
-ISOLATION_FOREST_LEGACY = Path(settings.BASE_DIR) / 'ML' / 'saved_models' / 'isolation_forest.pkl'
 
 _rf_model = None
 _rf_error = None
@@ -39,8 +34,7 @@ def _load_random_forest():
         from sklearn.exceptions import InconsistentVersionWarning
         with warnings.catch_warnings():
             warnings.simplefilter('ignore', InconsistentVersionWarning)
-            path = RANDOM_FOREST_PATH if RANDOM_FOREST_PATH.exists() else RANDOM_FOREST_LEGACY
-            _rf_model = joblib.load(str(path))
+            _rf_model = joblib.load(str(RANDOM_FOREST_PATH))
     except Exception as exc:
         _rf_error = str(exc)
         _rf_model = None
@@ -58,8 +52,7 @@ def _load_isolation_forest():
         from sklearn.exceptions import InconsistentVersionWarning
         with warnings.catch_warnings():
             warnings.simplefilter('ignore', InconsistentVersionWarning)
-            path = ISOLATION_FOREST_PATH if ISOLATION_FOREST_PATH.exists() else ISOLATION_FOREST_LEGACY
-            _if_model = joblib.load(str(path))
+            _if_model = joblib.load(str(ISOLATION_FOREST_PATH))
     except Exception as exc:
         _if_error = str(exc)
         _if_model = None
