@@ -31,7 +31,7 @@
         <span class="aqi-category">{{ predicted_aqi_info.category }}</span>
         <span class="aqi-meaning">Random Forest forecast for next reading</span>
         {% else %}
-        <span class="aqi-number">&mdash;</span>
+        <span class="aqi-number">--</span>
         <span class="aqi-category">Unavailable</span>
         <span class="aqi-meaning">Prediction currently unavailable.</span>
         {% endif %}
@@ -49,8 +49,8 @@
     <span>
         Current AQI: <strong>{{ latest.calculated_aqi }}</strong>
         &nbsp;&bull;&nbsp;
-        Forecasted AQI: <strong>{% if prediction.aqi is not None %}{{ prediction.aqi|floatformat:1 }}{% else %}&mdash;{% endif %}</strong>
-        &nbsp;&mdash;&nbsp;
+        Forecasted AQI: <strong>{% if prediction.aqi is not None %}{{ prediction.aqi|floatformat:1 }}{% else %}--{% endif %}</strong>
+        &nbsp;-&nbsp;
         {{ comparison.text }}
     </span>
 </div>

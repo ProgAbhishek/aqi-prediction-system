@@ -19,7 +19,7 @@ def _latest_snapshot():
 
 
 def index(request):
-    """Dashboard — current AQI overview with prediction and anomaly status."""
+    """Dashboard - current AQI overview with prediction and anomaly status."""
     latest, prediction, anomaly = _latest_snapshot()
 
     # Build predicted AQI info and comparison
@@ -52,7 +52,7 @@ def index(request):
 
 
 def prediction(request):
-    """Prediction — current vs predicted AQI using the Random Forest model."""
+    """Prediction - current vs predicted AQI using the Random Forest model."""
     latest, prediction, _ = _latest_snapshot()
 
     predicted_aqi_info = None
@@ -78,7 +78,7 @@ def prediction(request):
 
 
 def historical(request):
-    """Historical Data — AQI and PM2.5 trend charts plus recent readings."""
+    """Historical Data - AQI and PM2.5 trend charts plus recent readings."""
     context = {
         'total_records': services.count_records(),
         'recent': services.get_recent_readings(20),
@@ -88,7 +88,7 @@ def historical(request):
 
 
 def anomaly(request):
-    """Anomaly Detection — latest status plus per-reading anomaly results."""
+    """Anomaly Detection - latest status plus per-reading anomaly results."""
     latest, _, anomaly_status = _latest_snapshot()
 
     recent = ml_services.annotate_anomalies(services.get_recent_readings(20))
@@ -106,5 +106,5 @@ def anomaly(request):
 
 
 def about(request):
-    """About Project — static project information."""
+    """About Project - static project information."""
     return render(request, 'dashboard/about.html')

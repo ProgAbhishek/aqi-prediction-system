@@ -51,7 +51,7 @@ PM10_BREAKPOINTS: List[Tuple[int, int, float, float]] = [
     (401, 500,  505.0, 604.0),
 ]
 
-# CO breakpoints in ppm (OpenWeatherMap gives μg/m³ — conversion applied)
+# CO breakpoints in ppm (OpenWeatherMap gives ug/m3 - conversion applied)
 CO_BREAKPOINTS_PPM: List[Tuple[int, int, float, float]] = [
     (0,   50,   0.0,  4.4),
     (51,  100,  4.5,  9.4),
@@ -62,7 +62,7 @@ CO_BREAKPOINTS_PPM: List[Tuple[int, int, float, float]] = [
     (401, 500,  40.5, 50.4),
 ]
 
-# NO₂ breakpoints in ppb (OpenWeatherMap gives μg/m³ — conversion applied)
+# NO2 breakpoints in ppb (OpenWeatherMap gives ug/m3 - conversion applied)
 NO2_BREAKPOINTS_PPB: List[Tuple[int, int, float, float]] = [
     (0,   50,   0,    53),
     (51,  100,  54,   100),
@@ -73,7 +73,7 @@ NO2_BREAKPOINTS_PPB: List[Tuple[int, int, float, float]] = [
     (401, 500,  1650, 2049),
 ]
 
-# O₃ breakpoints in ppb (8-hr, OpenWeatherMap gives μg/m³ — conversion applied)
+# O3 breakpoints in ppb (8-hr, OpenWeatherMap gives ug/m3 - conversion applied)
 O3_BREAKPOINTS_PPB: List[Tuple[int, int, float, float]] = [
     (0,   50,   0,   54),
     (51,  100,  55,  70),
@@ -82,7 +82,7 @@ O3_BREAKPOINTS_PPB: List[Tuple[int, int, float, float]] = [
     (201, 300,  106, 200),
 ]
 
-# SO₂ breakpoints in ppb (1-hr, OpenWeatherMap gives μg/m³ — conversion applied)
+# SO2 breakpoints in ppb (1-hr, OpenWeatherMap gives ug/m3 - conversion applied)
 SO2_BREAKPOINTS_PPB: List[Tuple[int, int, float, float]] = [
     (0,   50,   0,    35),
     (51,  100,  36,   75),

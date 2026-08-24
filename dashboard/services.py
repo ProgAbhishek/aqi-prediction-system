@@ -1,7 +1,7 @@
 """Service layer for reading air-quality data for the Django dashboard.
 
 The data-collection pipeline owns this database (database/air_quality.db).
-Django only reads from it — it never writes to or migrates the schema.
+Django only reads from it; it never writes to or migrates the schema.
 """
 
 import sqlite3
@@ -233,7 +233,7 @@ def compare_aqi(current_aqi, predicted_aqi):
     if current_aqi is None or predicted_aqi is None:
         return {
             'text': 'Comparison unavailable.',
-            'icon': '—',
+            'icon': '--',
             'css_class': 'comparison-neutral',
         }
     diff = predicted_aqi - current_aqi
@@ -251,7 +251,7 @@ def compare_aqi(current_aqi, predicted_aqi):
         }
     return {
         'text': 'Air quality is expected to remain similar.',
-        'icon': '—',
+        'icon': '~',
         'css_class': 'comparison-neutral',
     }
 
