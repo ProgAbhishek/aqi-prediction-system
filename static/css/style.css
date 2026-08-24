@@ -385,6 +385,34 @@ body {
     position: relative;
     margin-top: 1rem;
 }
+
+/* Chart filter buttons */
+.chart-filters {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+.filter-btn {
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    border: 1px solid #d1d5db;
+    background: transparent;
+    color: #6B7280;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s ease;
+}
+.filter-btn:hover {
+    border-color: #1D4ED8;
+    color: #1D4ED8;
+}
+.filter-btn.active {
+    background: #1D4ED8;
+    color: #fff;
+    border-color: #1D4ED8;
+}
+
 .chart-single {
     margin-bottom: 2rem;
 }

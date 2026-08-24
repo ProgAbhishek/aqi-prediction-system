@@ -35,8 +35,8 @@ def index(request):
     # Build pollutant list for the dashboard
     pollutants = services.get_pollutants(latest) if latest else []
 
-    # Historical data for the inline AQI trend chart
-    historical_data = services.get_historical_data(50)
+    # Historical data for the inline AQI trend chart (all records for filtering)
+    historical_data = services.get_historical_data_all()
 
     context = {
         'latest': latest,
@@ -82,7 +82,7 @@ def historical(request):
     context = {
         'total_records': services.count_records(),
         'recent': services.get_recent_readings(20),
-        'historical_json': json.dumps(services.get_historical_data()),
+        'historical_json': json.dumps(services.get_historical_data_all()),
     }
     return render(request, 'dashboard/historical.html', context)
 

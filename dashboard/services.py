@@ -373,3 +373,30 @@ def get_historical_data(limit=200):
         d['aqi'] = d.pop('calculated_aqi') or d.pop('aqi')
         result.append(d)
     return result
+
+
+def get_historical_data_all():
+    """Return ALL records ordered chronologically for chart rendering.
+
+    Used by pages with client-side time range filters (24h / 7d / 30d).
+    Returns a list of dicts with keys: timestamp, aqi, pm2_5.
+    Ordered oldest-first (ASC) so charts draw left-to-right in time.
+    """
+    try:
+        conn = _connect()
+        try:
+            rows = conn.execute(
+                'SELECT timestamp, calculated_aqi, aqi, pm2_5 '
+                'FROM air_quality ORDER BY id ASC'
+            ).fetchall()
+        finally:
+            conn.close()
+    except sqlite3.Error:
+        return []
+
+    result = []
+    for row in rows:
+        d = dict(row)
+        d['aqi'] = d.pop('calculated_aqi') or d.pop('aqi')
+        result.append(d)
+    return result
