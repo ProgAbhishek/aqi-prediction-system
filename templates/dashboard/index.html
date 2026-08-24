@@ -25,11 +25,11 @@
 
     <!-- Predicted AQI -->
     <div class="card aqi-hero-card {% if predicted_aqi_info %}{{ predicted_aqi_info.css_class }}{% endif %}">
-        <span class="card-label">Predicted AQI</span>
+        <span class="card-label">Forecasted AQI (~1hr)</span>
         {% if prediction.aqi is not None %}
-        <span class="aqi-number">{{ prediction.aqi }}</span>
+        <span class="aqi-number">{{ prediction.aqi|floatformat:1 }}</span>
         <span class="aqi-category">{{ predicted_aqi_info.category }}</span>
-        <span class="aqi-meaning">Random Forest model prediction</span>
+        <span class="aqi-meaning">Random Forest forecast for next reading</span>
         {% else %}
         <span class="aqi-number">&mdash;</span>
         <span class="aqi-category">Unavailable</span>
@@ -49,7 +49,7 @@
     <span>
         Current AQI: <strong>{{ latest.calculated_aqi }}</strong>
         &nbsp;&bull;&nbsp;
-        Predicted AQI: <strong>{% if prediction.aqi is not None %}{{ prediction.aqi }}{% else %}&mdash;{% endif %}</strong>
+        Forecasted AQI: <strong>{% if prediction.aqi is not None %}{{ prediction.aqi|floatformat:1 }}{% else %}&mdash;{% endif %}</strong>
         &nbsp;&mdash;&nbsp;
         {{ comparison.text }}
     </span>

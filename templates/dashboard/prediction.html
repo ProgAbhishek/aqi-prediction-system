@@ -1,7 +1,7 @@
 {% extends 'dashboard/base.html' %}
 
-{% block title %}AQI Prediction{% endblock %}
-{% block page_title %}AQI Prediction{% endblock %}
+{% block title %}AQI Forecast{% endblock %}
+{% block page_title %}AQI Forecast{% endblock %}
 
 {% block content %}
 
@@ -24,9 +24,9 @@
 
     <!-- Predicted AQI -->
     <div class="card aqi-hero-card {% if predicted_aqi_info %}{{ predicted_aqi_info.css_class }}{% endif %}">
-        <span class="card-label">Predicted AQI</span>
+        <span class="card-label">Forecasted AQI (~1hr)</span>
         {% if prediction.aqi is not None %}
-        <span class="aqi-number">{{ prediction.aqi }}</span>
+        <span class="aqi-number">{{ prediction.aqi|floatformat:1 }}</span>
         <span class="aqi-category">{{ predicted_aqi_info.category }}</span>
         <span class="aqi-meaning">{{ predicted_aqi_info.meaning }}</span>
         {% else %}
@@ -47,7 +47,7 @@
     <span>
         Current AQI: <strong>{{ latest.calculated_aqi }}</strong>
         &nbsp;&bull;&nbsp;
-        Predicted AQI: <strong>{% if prediction.aqi is not None %}{{ prediction.aqi }}{% else %}&mdash;{% endif %}</strong>
+        Forecasted AQI: <strong>{% if prediction.aqi is not None %}{{ prediction.aqi|floatformat:1 }}{% else %}&mdash;{% endif %}</strong>
         &nbsp;&mdash;&nbsp;
         {{ comparison.text }}
     </span>
@@ -61,8 +61,8 @@
         <div class="section-title">📊 Prediction Details</div>
         <p>
             Current AQI: <strong>{{ latest.calculated_aqi }}</strong> ({{ latest.aqi_label }})<br>
-            Predicted AQI: <strong>{{ prediction.aqi }}</strong> ({{ predicted_aqi_info.category }})<br>
-            Difference: <strong>{{ prediction.aqi|add:"-" }}{{ latest.calculated_aqi }}</strong> points
+            Forecasted AQI: <strong>{{ prediction.aqi|floatformat:1 }}</strong> ({{ predicted_aqi_info.category }})<br>
+            Difference: <strong>{{ prediction.aqi|floatformat:1 }}</strong> vs current {{ latest.calculated_aqi }}
         </p>
     </div>
     <div class="card health-card">

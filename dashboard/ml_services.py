@@ -71,12 +71,12 @@ def _parse_timestamp(value):
 
 
 def predict_aqi(reading):
-    """Predict AQI for a reading dict using the trained Random Forest.
+    """Forecast the next reading's AQI using the trained Random Forest.
 
     The model was trained on ['pm2_5', 'pm10', 'co', 'no2', 'o3', 'so2',
-    'hour', 'day'] -> calculated_aqi (0–500).
+    'hour', 'day'] at time t -> calculated_aqi at time t+1 (~1 hour ahead).
 
-    Returns {'aqi': int} or {'error': message}.
+    Returns {'aqi': float} or {'error': message}.
     """
     model = _load_random_forest()
     if model is None:
@@ -104,8 +104,8 @@ def predict_aqi(reading):
         prediction = model.predict(np.array([sample]))[0]
 
     # Clamp to valid AQI range
-    aqi_val = max(0, min(500, int(round(prediction))))
-    return {'aqi': aqi_val, 'raw': float(prediction)}
+    aqi_val = max(0.0, min(500.0, float(prediction)))
+    return {'aqi': aqi_val}
 
 
 def predict_anomaly(reading):
