@@ -10,20 +10,24 @@
     <p class="subtitle">AQI (EPA 0–500) and PM2.5 trends from the database</p>
 </div>
 
-<div class="chart-filters">
-    <button class="filter-btn" onclick="filterHistoricalChart(24, this)">Last 24 Hours</button>
-    <button class="filter-btn active" onclick="filterHistoricalChart(168, this)">Last 7 Days</button>
-    <button class="filter-btn" onclick="filterHistoricalChart(720, this)">Last 30 Days</button>
-</div>
-
 <div class="charts-grid">
-    <div class="card chart-card">
+    <div class="card chart-card" style="position:relative;">
+        <select class="chart-dropdown" onchange="filterHistoricalChart(this.value)">
+            <option value="24">Last 24 Hours</option>
+            <option value="168" selected>Last 7 Days</option>
+            <option value="720">Last 30 Days</option>
+        </select>
         <h3 class="chart-title">AQI Over Time</h3>
         <div class="chart-wrapper">
             <canvas id="aqiChart"></canvas>
         </div>
     </div>
-    <div class="card chart-card">
+    <div class="card chart-card" style="position:relative;">
+        <select class="chart-dropdown" onchange="filterHistoricalChart(this.value)">
+            <option value="24">Last 24 Hours</option>
+            <option value="168" selected>Last 7 Days</option>
+            <option value="720">Last 30 Days</option>
+        </select>
         <h3 class="chart-title">PM2.5 Over Time</h3>
         <div class="chart-wrapper">
             <canvas id="pm25Chart"></canvas>
@@ -112,9 +116,7 @@ const commonOptions = {
     elements: { point: { radius: 2, hoverRadius: 5 }, line: { tension: 0.4 } }
 };
 
-function filterHistoricalChart(hours, btn) {
-    document.querySelectorAll('.chart-filters .filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+function filterHistoricalChart(hours) {
 
     const cutoff = new Date(Date.now() - hours * 3600000);
     const filtered = allHistoricalData.filter(d => new Date(d.timestamp) >= cutoff);
@@ -189,7 +191,7 @@ function filterHistoricalChart(hours, btn) {
 }
 
 if (allHistoricalData.length > 0) {
-    filterHistoricalChart(168, document.querySelector('.chart-filters .filter-btn.active'));
+    filterHistoricalChart(168);
 }
 </script>
 {% endblock %}
