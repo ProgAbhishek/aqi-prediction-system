@@ -425,6 +425,57 @@ body {
     height: 300px;
 }
 
+/* Forecast Form */
+.forecast-form-card {
+    padding: 2rem;
+}
+.forecast-form {
+    display: flex;
+    align-items: flex-end;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+.form-group label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+.form-input {
+    padding: 0.6rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-primary);
+    background: #fff;
+    outline: none;
+    min-width: 240px;
+}
+.form-input:focus {
+    border-color: #1D4ED8;
+    box-shadow: 0 0 0 2px rgba(29,78,216,0.15);
+}
+.btn-primary {
+    padding: 0.6rem 1.5rem;
+    background: #1D4ED8;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.btn-primary:hover {
+    background: #1e40af;
+}
+
 /* Tables */
 .table-wrapper {
     overflow-x: auto;

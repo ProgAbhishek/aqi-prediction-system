@@ -108,6 +108,40 @@ def predict_aqi(reading):
     return {'aqi': aqi_val}
 
 
+def predict_aqi_for_datetime(reading, target_dt):
+    """Forecast AQI for a specific future date/time using current pollutant values.
+
+    Uses the latest pollutant readings but substitutes hour and day from
+    the user-provided target datetime. This lets users check what AQI
+    might look like at a chosen time.
+
+    Returns {'aqi': float} or {'error': message}.
+    """
+    model = _load_random_forest()
+    if model is None:
+        return {'error': _rf_error or 'Model could not be loaded.'}
+
+    feature_names = list(model.feature_names_in_)
+    row = dict(reading)
+    row['hour'] = target_dt.hour
+    row['day'] = target_dt.day
+
+    try:
+        sample = [float(row[name]) for name in feature_names]
+    except (KeyError, TypeError, ValueError) as exc:
+        missing = [name for name in feature_names if name not in row]
+        if missing:
+            return {'error': f'Model expects features not available in the data: {missing}'}
+        return {'error': f'Invalid feature value: {exc}'}
+
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore', UserWarning)
+        prediction = model.predict(np.array([sample]))[0]
+
+    aqi_val = max(0.0, min(500.0, float(prediction)))
+    return {'aqi': aqi_val}
+
+
 def predict_anomaly(reading):
     """Run Isolation Forest anomaly detection on a reading dict.
 

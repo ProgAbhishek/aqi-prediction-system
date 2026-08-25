@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 
 from django.conf import settings
 from django.shortcuts import render
@@ -52,25 +53,51 @@ def index(request):
 
 
 def prediction(request):
-    """Prediction - current vs predicted AQI using the Random Forest model."""
-    latest, prediction, _ = _latest_snapshot()
+    """Prediction - forecast AQI for a user-chosen date/time."""
+    latest = services.get_latest_reading()
 
     predicted_aqi_info = None
-    comparison = None
-    if prediction and prediction.get('aqi') is not None:
-        predicted_aqi_info = services.get_aqi_info(prediction['aqi'])
-        comparison = services.compare_aqi(
-            latest.get('calculated_aqi') if latest else None,
-            prediction['aqi'],
-        )
+    custom_prediction = None
+    custom_aqi_info = None
+    error_msg = None
+    selected_dt = None
+
+    if request.method == 'POST':
+        dt_str = request.POST.get('target_datetime', '')
+        if not dt_str:
+            error_msg = 'Please select a date and time.'
+        elif latest is None:
+            error_msg = 'No sensor data available to base prediction on.'
+        else:
+            try:
+                selected_dt = datetime.fromisoformat(dt_str)
+            except ValueError:
+                error_msg = 'Invalid date/time format.'
+            else:
+                custom_prediction = ml_services.predict_aqi_for_datetime(latest, selected_dt)
+                if custom_prediction.get('error'):
+                    error_msg = custom_prediction['error']
+                else:
+                    custom_aqi_info = services.get_aqi_info(custom_prediction['aqi'])
+
+    # Default next-hour prediction for the hero card
+    default_prediction = None
+    default_aqi_info = None
+    if latest:
+        default_prediction = ml_services.predict_aqi(latest)
+        if default_prediction.get('aqi') is not None:
+            default_aqi_info = services.get_aqi_info(default_prediction['aqi'])
 
     pollutants = services.get_pollutants(latest) if latest else []
 
     context = {
         'latest': latest,
-        'prediction': prediction,
-        'predicted_aqi_info': predicted_aqi_info,
-        'comparison': comparison,
+        'default_prediction': default_prediction,
+        'default_aqi_info': default_aqi_info,
+        'custom_prediction': custom_prediction,
+        'custom_aqi_info': custom_aqi_info,
+        'selected_dt': selected_dt.strftime('%Y-%m-%dT%H:%M') if selected_dt else '',
+        'error_msg': error_msg,
         'pollutants': pollutants,
         'total_records': services.count_records(),
     }

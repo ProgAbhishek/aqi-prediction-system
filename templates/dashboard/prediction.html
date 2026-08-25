@@ -6,15 +6,14 @@
 {% block content %}
 
 <div class="page-header">
-    <h1>AQI Prediction</h1>
-    <p class="subtitle">Random Forest model prediction (EPA AQI 0–500 scale)</p>
+    <h1>AQI Forecast</h1>
+    <p class="subtitle">Predict air quality for any future date and time</p>
 </div>
 
 {% if latest %}
 
-<!-- Current vs Predicted AQI -->
+<!-- Current AQI Hero -->
 <div class="aqi-hero-grid">
-    <!-- Current AQI -->
     <div class="card aqi-hero-card {{ latest.aqi_css_class }}">
         <span class="card-label">Current AQI</span>
         <span class="aqi-number">{{ latest.calculated_aqi }}</span>
@@ -22,60 +21,86 @@
         <span class="aqi-meaning">{{ latest.aqi_meaning }}</span>
     </div>
 
-    <!-- Predicted AQI -->
-    <div class="card aqi-hero-card {% if predicted_aqi_info %}{{ predicted_aqi_info.css_class }}{% endif %}">
-        <span class="card-label">Forecasted AQI (~1hr)</span>
-        {% if prediction.aqi is not None %}
-        <span class="aqi-number">{{ prediction.aqi|floatformat:1 }}</span>
-        <span class="aqi-category">{{ predicted_aqi_info.category }}</span>
-        <span class="aqi-meaning">{{ predicted_aqi_info.meaning }}</span>
-        {% else %}
-        <span class="aqi-number">--</span>
-        <span class="aqi-category">Unavailable</span>
-        <span class="aqi-meaning">Prediction currently unavailable.</span>
-        {% endif %}
-        {% if prediction.error %}
-        <span class="card-error">{{ prediction.error }}</span>
-        {% endif %}
+    {% if default_aqi_info %}
+    <div class="card aqi-hero-card {{ default_aqi_info.css_class }}">
+        <span class="card-label">Next Hour Estimate</span>
+        <span class="aqi-number">{{ default_prediction.aqi|floatformat:1 }}</span>
+        <span class="aqi-category">{{ default_aqi_info.category }}</span>
+        <span class="aqi-meaning">Based on current pollutant levels</span>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Date/Time Picker Form -->
+<div class="section">
+    <h2>Choose a Future Date & Time</h2>
+    <div class="card forecast-form-card">
+        <form method="post" action="{% url 'dashboard:prediction' %}" class="forecast-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="target_datetime">Select date and time to forecast:</label>
+                <input type="datetime-local" id="target_datetime" name="target_datetime"
+                       value="{{ selected_dt }}" required class="form-input">
+            </div>
+            <button type="submit" class="btn-primary">Forecast AQI</button>
+        </form>
     </div>
 </div>
 
-<!-- Comparison -->
-{% if comparison %}
-<div class="card comparison-card {{ comparison.css_class }}">
-    <span class="comparison-icon">{{ comparison.icon }}</span>
-    <span>
-        Current AQI: <strong>{{ latest.calculated_aqi }}</strong>
-        &nbsp;&bull;&nbsp;
-        Forecasted AQI: <strong>{% if prediction.aqi is not None %}{{ prediction.aqi|floatformat:1 }}{% else %}--{% endif %}</strong>
-        &nbsp;-&nbsp;
-        {{ comparison.text }}
-    </span>
-</div>
-{% endif %}
-
-<!-- Prediction Summary -->
-{% if prediction.aqi is not None %}
-<div class="health-section">
-    <div class="card health-card">
-        <div class="section-title">📊 Prediction Details</div>
-        <p>
-            Current AQI: <strong>{{ latest.calculated_aqi }}</strong> ({{ latest.aqi_label }})<br>
-            Forecasted AQI: <strong>{{ prediction.aqi|floatformat:1 }}</strong> ({{ predicted_aqi_info.category }})<br>
-            Difference: <strong>{{ prediction.aqi|floatformat:1 }}</strong> vs current {{ latest.calculated_aqi }}
-        </p>
-    </div>
-    <div class="card health-card">
-        <div class="section-title">🫁 Predicted Health Impact</div>
-        <p>{{ predicted_aqi_info.health_recommendation }}</p>
-    </div>
+<!-- Error Message -->
+{% if error_msg %}
+<div class="card" style="background: #fef2f2; border-left: 4px solid #dc2626; padding: 1rem 1.5rem; margin-bottom: 1.5rem;">
+    <strong style="color: #dc2626;">Error:</strong>
+    <span style="color: #dc2626;"> {{ error_msg }}</span>
 </div>
 {% endif %}
 
-<!-- Prediction Input Features -->
+<!-- Custom Prediction Results -->
+{% if custom_prediction and custom_prediction.aqi is not None %}
+<div class="section">
+    <h2>Forecast Result</h2>
+    <div class="aqi-hero-grid">
+        <div class="card aqi-hero-card {{ custom_aqi_info.css_class }}">
+            <span class="card-label">Forecasted AQI</span>
+            <span class="aqi-number">{{ custom_prediction.aqi|floatformat:1 }}</span>
+            <span class="aqi-category">{{ custom_aqi_info.category }}</span>
+            <span class="aqi-meaning">{{ custom_aqi_info.meaning }}</span>
+        </div>
+
+        <div class="card aqi-hero-card {{ latest.aqi_css_class }}">
+            <span class="card-label">Current AQI</span>
+            <span class="aqi-number">{{ latest.calculated_aqi }}</span>
+            <span class="aqi-category">{{ latest.aqi_label }}</span>
+            <span class="aqi-meaning">{{ selected_dt|date:"M d, Y H:i" }}</span>
+        </div>
+    </div>
+
+    <!-- Health Recommendations -->
+    <div class="health-section">
+        <div class="card health-card">
+            <div class="section-title">Health Recommendation</div>
+            <p>{{ custom_aqi_info.health_recommendation }}</p>
+        </div>
+
+        {% if custom_aqi_info.suggestions %}
+        <div class="card health-card">
+            <div class="section-title">Activities</div>
+            <ul class="suggestions-list">
+                {% for s in custom_aqi_info.suggestions %}
+                <li>{{ s }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Current Pollutant Levels -->
 {% if pollutants %}
 <div class="section">
-    <h2>Prediction Input Features</h2>
+    <h2>Current Sensor Readings</h2>
+    <p class="subtitle" style="margin-bottom: 1rem;">Forecast uses these values with your selected time</p>
     <div class="pollutant-grid">
         {% for p in pollutants %}
         <div class="card pollutant-card">
