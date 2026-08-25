@@ -13,7 +13,7 @@
 {% if email_sent %}
 <div class="card" style="background: #d1e7dd; border-left: 4px solid #0f5132; margin-bottom: 1.5rem; padding: 1rem 1.5rem;">
     <strong style="color: #0f5132;">Email alert sent</strong>
-    <span style="color: #0f5132;"> &mdash; new anomalous readings have been reported to {{ EMAIL_RECIPIENT }}.</span>
+    <span style="color: #0f5132;"> - new anomalous readings have been reported to {{ EMAIL_RECIPIENT }}.</span>
 </div>
 {% endif %}
 
@@ -37,7 +37,7 @@
         </span>
         <span class="aqi-meaning">Isolation Forest output: {{ anomaly.raw }}</span>
         {% else %}
-        <span class="aqi-number">&mdash;</span>
+        <span class="aqi-number">--</span>
         <span class="aqi-category">Unavailable</span>
         <span class="aqi-meaning">Anomaly detection currently unavailable.</span>
         {% endif %}

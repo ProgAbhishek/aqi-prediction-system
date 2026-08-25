@@ -72,6 +72,12 @@ body {
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    overflow-y: auto;
+    z-index: 200;
 }
 
 .sidebar-header {
@@ -162,7 +168,8 @@ body {
     flex: 1;
     display: flex;
     flex-direction: column;
-    min-width: 0; 
+    min-width: 0;
+    margin-left: 260px;
 }
 
 /* Top Header */
@@ -174,6 +181,9 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 0 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
 .header-left {
@@ -385,6 +395,29 @@ body {
     position: relative;
     margin-top: 1rem;
 }
+
+/* Chart dropdown filter */
+.chart-dropdown {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    z-index: 10;
+    padding: 0.35rem 0.7rem;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    background: #fff;
+    color: #374151;
+    font-size: 0.8rem;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    outline: none;
+}
+.chart-dropdown:focus {
+    border-color: #1D4ED8;
+    box-shadow: 0 0 0 2px rgba(29,78,216,0.15);
+}
+
 .chart-single {
     margin-bottom: 2rem;
 }
@@ -554,6 +587,7 @@ body {
         transition: left 0.3s;
     }
     .sidebar.sidebar-open { left: 0; }
+    .main-wrapper { margin-left: 0; }
     .mobile-toggle { display: block; }
     .header-right { display: none; }
 }

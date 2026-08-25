@@ -1,7 +1,7 @@
 """Service layer for reading air-quality data for the Django dashboard.
 
 The data-collection pipeline owns this database (database/air_quality.db).
-Django only reads from it — it never writes to or migrates the schema.
+Django only reads from it; it never writes to or migrates the schema.
 """
 
 import sqlite3
@@ -233,7 +233,7 @@ def compare_aqi(current_aqi, predicted_aqi):
     if current_aqi is None or predicted_aqi is None:
         return {
             'text': 'Comparison unavailable.',
-            'icon': '—',
+            'icon': '--',
             'css_class': 'comparison-neutral',
         }
     diff = predicted_aqi - current_aqi
@@ -251,7 +251,7 @@ def compare_aqi(current_aqi, predicted_aqi):
         }
     return {
         'text': 'Air quality is expected to remain similar.',
-        'icon': '—',
+        'icon': '~',
         'css_class': 'comparison-neutral',
     }
 
@@ -370,6 +370,33 @@ def get_historical_data(limit=200):
     for row in reversed(rows):
         d = dict(row)
         # Use calculated_aqi as the display AQI; fall back to api aqi
+        d['aqi'] = d.pop('calculated_aqi') or d.pop('aqi')
+        result.append(d)
+    return result
+
+
+def get_historical_data_all():
+    """Return ALL records ordered chronologically for chart rendering.
+
+    Used by pages with client-side time range filters (24h / 7d / 30d).
+    Returns a list of dicts with keys: timestamp, aqi, pm2_5.
+    Ordered oldest-first (ASC) so charts draw left-to-right in time.
+    """
+    try:
+        conn = _connect()
+        try:
+            rows = conn.execute(
+                'SELECT timestamp, calculated_aqi, aqi, pm2_5 '
+                'FROM air_quality ORDER BY id ASC'
+            ).fetchall()
+        finally:
+            conn.close()
+    except sqlite3.Error:
+        return []
+
+    result = []
+    for row in rows:
+        d = dict(row)
         d['aqi'] = d.pop('calculated_aqi') or d.pop('aqi')
         result.append(d)
     return result

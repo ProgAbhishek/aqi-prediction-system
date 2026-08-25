@@ -65,7 +65,9 @@
 
 {% block extra_scripts %}
 <script>
-const historicalData = {{ historical_json|safe }};
+const allHistoricalData = {{ historical_json|safe }};
+const cutoff7d = new Date(Date.now() - 168 * 3600000);
+const historicalData = allHistoricalData.filter(d => new Date(d.timestamp) >= cutoff7d);
 
 if (historicalData.length > 0) {
     const labels = historicalData.map(d => {
